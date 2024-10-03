@@ -12,34 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package output
 
 import (
-	"os"
-
-	"mmdb-cli/pkg/output"
-
-	"github.com/spf13/cobra"
+	"bytes"
+	"encoding/json"
+	"fmt"
 )
 
-var outputOptions output.OutputOptions
-
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:   "mmdb-cli",
-	Short: "InfraZ MMDb CLI is a command line tool for managing MMDB",
-	Long: `
-InfraZ MMDb CLI is a command line tool for managing MMDB 
-Complete documentation is available at https://docs.infraz.io/mmdb-cli`,
-}
-
-func Execute() {
-	err := rootCmd.Execute()
-	if err != nil {
-		os.Exit(1)
+func JsonOutput(data []byte, options OutputOptions) error {
+	if options.JsonPretty {
+		var prettyJSON bytes.Buffer
+		err := json.Indent(&prettyJSON, data, "", "\t")
+		if err != nil {
+			return err
+		}
+		fmt.Println(string(prettyJSON.Bytes()))
+	} else {
+		fmt.Println(string(data))
 	}
-}
-
-func init() {
-	rootCmd.AddCommand(metadataCmd)
+	return nil
 }

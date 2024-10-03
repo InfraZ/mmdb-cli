@@ -12,34 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package output
 
-import (
-	"os"
+import "fmt"
 
-	"mmdb-cli/pkg/output"
-
-	"github.com/spf13/cobra"
-)
-
-var outputOptions output.OutputOptions
-
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:   "mmdb-cli",
-	Short: "InfraZ MMDb CLI is a command line tool for managing MMDB",
-	Long: `
-InfraZ MMDb CLI is a command line tool for managing MMDB 
-Complete documentation is available at https://docs.infraz.io/mmdb-cli`,
+type OutputOptions struct {
+	Format     string
+	JsonPretty bool
 }
 
-func Execute() {
-	err := rootCmd.Execute()
-	if err != nil {
-		os.Exit(1)
+func Output(byteData []byte, options OutputOptions) error {
+
+	if (options.JsonPretty) && (options.Format != "json") {
+		return fmt.Errorf("Pretty print is only supported for JSON output")
 	}
-}
 
-func init() {
-	rootCmd.AddCommand(metadataCmd)
+	if options.Format == "json-pretty" {
+		options.Format = "json"
+		options.JsonPretty = true
+	}
+
+	switch options.Format {
+	case "json":
+		return JsonOutput(byteData, options)
+	case "yaml":
+		return YamlOutput(byteData, options)
+	default:
+		return fmt.Errorf("Unsupported output format: %s", options.Format)
+	}
+
 }

@@ -12,34 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package output
 
 import (
-	"os"
+	"fmt"
 
-	"mmdb-cli/pkg/output"
-
-	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 )
 
-var outputOptions output.OutputOptions
+func YamlOutput(data []byte, options OutputOptions) error {
+	var jsonData interface{}
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:   "mmdb-cli",
-	Short: "InfraZ MMDb CLI is a command line tool for managing MMDB",
-	Long: `
-InfraZ MMDb CLI is a command line tool for managing MMDB 
-Complete documentation is available at https://docs.infraz.io/mmdb-cli`,
-}
-
-func Execute() {
-	err := rootCmd.Execute()
+	// Unmarshal the JSON data into a Go data structure
+	err := yaml.Unmarshal(data, &jsonData)
 	if err != nil {
-		os.Exit(1)
+		return err
 	}
-}
 
-func init() {
-	rootCmd.AddCommand(metadataCmd)
+	// Marshal the Go data structure into YAML format
+	yamlData, err := yaml.Marshal(jsonData)
+	if err != nil {
+		return err
+	}
+
+	// Print the YAML data
+	fmt.Println(string(yamlData))
+
+	return nil
 }
