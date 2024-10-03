@@ -16,15 +16,16 @@ package metadata
 import "testing"
 
 func TestMetadataMMDB(t *testing.T) {
-	expected := "" // TODO: Define expected value
-	testMMDBFile := "../output/GeoLite2-Country.mmdb"
+	expected := `{"description":{"en":"GeoLite2 Country database"},"database_type":"GeoLite2-Country","languages":["de","en","es","fr","ja","pt-BR","ru","zh-CN"],"binary_format_major_version":2,"binary_format_minor_version":0,"build_epoch":1726249063,"ip_version":6,"node_count":1234259,"record_size":24}`
+	testMMDBFile := "../../output/GeoLite2-Country.mmdb"
 
 	result, err := MetadataMMDB(CmdMetadataConfig{InputFile: testMMDBFile})
+	jsonResult := string(result)
 	if err != nil {
 		t.Errorf("MetadataMMDB() error = %v; want nil", err)
 	}
 
-	if result != nil {
-		t.Errorf("MetadataMMDB() = %v; want %v", result, expected)
+	if string(result) != expected {
+		t.Errorf("MetadataMMDB() = %v; want %v", jsonResult, expected)
 	}
 }
