@@ -26,3 +26,6 @@ go.work.sum
 
 # Binary files
 mmdb-cli
+
+# Output files
+output/

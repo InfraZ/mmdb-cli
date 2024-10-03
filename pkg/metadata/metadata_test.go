@@ -11,30 +11,20 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package cmd
+package metadata
 
-import (
-	"os"
+import "testing"
 
-	"github.com/spf13/cobra"
-)
+func TestMetadataMMDB(t *testing.T) {
+	expected := "" // TODO: Define expected value
+	testMMDBFile := "../output/GeoLite2-Country.mmdb"
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:   "mmdb-cli",
-	Short: "InfraZ MMDb CLI is a command line tool for managing MMDB",
-	Long: `
-InfraZ MMDb CLI is a command line tool for managing MMDB 
-Complete documentation is available at https://docs.infraz.io/mmdb-cli`,
-}
-
-func Execute() {
-	err := rootCmd.Execute()
+	result, err := MetadataMMDB(CmdMetadataConfig{InputFile: testMMDBFile})
 	if err != nil {
-		os.Exit(1)
+		t.Errorf("MetadataMMDB() error = %v; want nil", err)
 	}
-}
 
-func init() {
-	rootCmd.AddCommand(metadataCmd)
+	if result != nil {
+		t.Errorf("MetadataMMDB() = %v; want %v", result, expected)
+	}
 }
