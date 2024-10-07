@@ -15,6 +15,8 @@
 package inspect
 
 import (
+	"encoding/json"
+	"net"
 	"testing"
 )
 
@@ -45,4 +47,38 @@ func TestDetermineLookupNetworkInvalidInput(t *testing.T) {
 	}()
 
 	determineLookupNetwork("invalid_input")
+}
+
+func TestMMDBReader(t *testing.T) {
+	testInput := "../../output/GeoLite2-Country.mmdb"
+
+	_, err := mmdbReader(testInput)
+	if err != nil {
+		t.Errorf("mmdbReader() error = %v; want nil", err)
+	}
+}
+
+func TestMMDBLookup(t *testing.T) {
+	testInput := "../../output/GeoLite2-Country.mmdb"
+	testsData := []struct {
+		query    string
+		expected string
+	}{
+		{"1.1.1.1", `{"registered_country":{"geoname_id":2077456,"iso_code":"AU","names":{"de":"Australien","en":"Australia","es":"Australia","fr":"Australie","ja":"オーストラリア","pt-BR":"Austrália","ru":"Австралия","zh-CN":"澳大利亚"}}}`},
+	}
+
+	for _, test := range testsData {
+
+		reader, _ := mmdbReader(testInput)
+		query := net.ParseIP(test.query)
+
+		record, err := mmdbLookup(reader, query)
+
+		recordJson, _ := json.Marshal(record)
+		expectedJson := []byte(test.expected)
+
+		if (err != nil) || (string(recordJson) != string(expectedJson)) {
+			t.Errorf("mmdbLookup() = %v; want %v", string(recordJson), string(expectedJson))
+		}
+	}
 }
