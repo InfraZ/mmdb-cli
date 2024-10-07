@@ -23,7 +23,7 @@ import (
 func JsonOutput(data []byte, options OutputOptions) error {
 	if options.JsonPretty {
 		var prettyJSON bytes.Buffer
-		err := json.Indent(&prettyJSON, data, "", "\t")
+		err := json.Indent(&prettyJSON, data, "", "    ")
 		if err != nil {
 			return err
 		}

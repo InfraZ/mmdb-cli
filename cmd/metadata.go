@@ -36,9 +36,12 @@ var metadataCmd = &cobra.Command{
 	Short: metadataCmdShortDesc,
 	Long:  metadataCmdLongDesc,
 	Run: func(cmd *cobra.Command, args []string) {
-		metadataJson, _ := metadata.MetadataMMDB(cmdMetadataConfig)
-		err := output.Output(metadataJson, outputOptions)
+		metadataJson, err := metadata.MetadataMMDB(cmdMetadataConfig)
+		if err != nil {
+			log.Fatal(err)
+		}
 
+		err = output.Output(metadataJson, outputOptions)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -46,7 +49,10 @@ var metadataCmd = &cobra.Command{
 }
 
 func init() {
-
+	// Add flags to the metadata command
 	metadataCmd.Flags().StringVarP(&cmdMetadataConfig.InputFile, "input", "i", "", "Input path of the MMDB file")
 	metadataCmd.Flags().StringVarP(&outputOptions.Format, "format", "f", "yaml", "Output format (yaml, json, json-pretty)")
+
+	// Mark required flags
+	metadataCmd.MarkFlagRequired("input")
 }

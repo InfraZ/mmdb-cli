@@ -42,4 +42,5 @@ func Execute() {
 
 func init() {
 	rootCmd.AddCommand(metadataCmd)
+	rootCmd.AddCommand(inspectCmd)
 }
