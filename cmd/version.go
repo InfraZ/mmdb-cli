@@ -17,33 +17,28 @@ limitations under the License.
 package cmd
 
 import (
-	"os"
-
-	"mmdb-cli/pkg/output"
+	"fmt"
 
 	"github.com/spf13/cobra"
 )
 
-var outputOptions output.OutputOptions
+const (
+	version    = "v0.1.0-alpha"
+	maintainer = "The InfraZ Authors"
+)
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:   "mmdb-cli",
-	Short: "InfraZ MMDb CLI is a command line tool for managing MMDB",
-	Long: `
-InfraZ MMDb CLI is a command line tool for managing MMDB 
-Complete documentation is available at https://docs.infraz.io/mmdb-cli`,
-}
+const (
+	versionCmdName      = "version"
+	versionCmdShortDesc = "Show version information for mmdb-cli"
+	versionCmdLongDesc  = `This command shows version information for mmdb-cli`
+)
 
-func Execute() {
-	err := rootCmd.Execute()
-	if err != nil {
-		os.Exit(1)
-	}
-}
-
-func init() {
-	rootCmd.AddCommand(versionCmd)
-	rootCmd.AddCommand(metadataCmd)
-	rootCmd.AddCommand(inspectCmd)
+// versionCmd represents the generate command
+var versionCmd = &cobra.Command{
+	Use:   versionCmdName,
+	Short: versionCmdShortDesc,
+	Long:  versionCmdLongDesc,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Printf("Version: \t%s\nMaintainer: \t%s\n", version, maintainer)
+	},
 }
