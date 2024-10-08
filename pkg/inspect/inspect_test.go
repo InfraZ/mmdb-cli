@@ -56,7 +56,7 @@ func TestMMDBReader(t *testing.T) {
 
 	_, err := mmdbReader(testInput)
 	if err != nil {
-		t.Errorf("mmdbReader() error = %v; want nil", err)
+		t.Errorf("TestMMDBReader() error = %v; want nil", err)
 	}
 }
 
@@ -80,7 +80,7 @@ func TestMMDBLookup(t *testing.T) {
 		expectedJson := []byte(test.expected)
 
 		if (err != nil) || (string(recordJson) != string(expectedJson)) {
-			t.Errorf("mmdbLookup() = %v; want %v", string(recordJson), string(expectedJson))
+			t.Errorf("TestMMDBLookup() = %v; want %v", string(recordJson), string(expectedJson))
 		}
 	}
 }

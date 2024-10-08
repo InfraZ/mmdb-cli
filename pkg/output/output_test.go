@@ -24,7 +24,7 @@ func TestOutput(t *testing.T) {
 
 	err := Output(testData, testOptions)
 	if err != nil {
-		t.Errorf("Output() error = %v; want nil", err)
+		t.Errorf("TestOutput() error = %v; want nil", err)
 	}
 }
 
@@ -34,7 +34,7 @@ func TestOutputUnsupportedFormat(t *testing.T) {
 
 	err := Output(testData, testOptions)
 	if err == nil {
-		t.Errorf("Output() error = nil; want error")
+		t.Errorf("TestOutputUnsupportedFormat() error = %v; want nil", err)
 	}
 }
 
@@ -44,7 +44,7 @@ func TestOutputJson(t *testing.T) {
 
 	err := Output(testData, testOptions)
 	if err != nil {
-		t.Errorf("Output() error = %v; want nil", err)
+		t.Errorf("TestOutputJson() error = %v; want nil", err)
 	}
 }
 
@@ -54,7 +54,7 @@ func TestOutputJsonPretty(t *testing.T) {
 
 	err := Output(testData, testOptions)
 	if err != nil {
-		t.Errorf("Output() error = %v; want nil", err)
+		t.Errorf("TestOutputJsonPretty() error = %v; want nil", err)
 	}
 }
 
@@ -64,6 +64,6 @@ func TestOutputYaml(t *testing.T) {
 
 	err := Output(testData, testOptions)
 	if err != nil {
-		t.Errorf("Output() error = %v; want nil", err)
+		t.Errorf("TestOutputYaml() error = %v; want nil", err)
 	}
 }
