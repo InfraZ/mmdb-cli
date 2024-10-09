@@ -47,4 +47,5 @@ func init() {
 	rootCmd.AddCommand(metadataCmd)
 	rootCmd.AddCommand(inspectCmd)
 	rootCmd.AddCommand(updateCmd)
+	rootCmd.AddCommand(dumpCmd)
 }

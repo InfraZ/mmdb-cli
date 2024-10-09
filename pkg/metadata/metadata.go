@@ -43,7 +43,7 @@ func MetadataMMDB(cfg CmdMetadataConfig) ([]byte, error) {
 
 	db, err := maxminddb.Open(cfg.InputFile)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("[!] Failed to open database: %s - %v", cfg.InputFile, err)
 	}
 	defer db.Close()
 
