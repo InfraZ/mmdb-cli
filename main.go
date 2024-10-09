@@ -16,7 +16,7 @@ limitations under the License.
 
 package main
 
-import "mmdb-cli/cmd"
+import "github.com/InfraZ/mmdb-cli/cmd"
 
 func main() {
 	cmd.Execute()

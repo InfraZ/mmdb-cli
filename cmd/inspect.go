@@ -18,8 +18,9 @@ package cmd
 
 import (
 	"log"
-	"mmdb-cli/pkg/inspect"
-	"mmdb-cli/pkg/output"
+
+	"github.com/InfraZ/mmdb-cli/pkg/inspect"
+	"github.com/InfraZ/mmdb-cli/pkg/output"
 
 	"github.com/spf13/cobra"
 )
