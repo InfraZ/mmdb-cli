@@ -19,7 +19,7 @@ package cmd
 import (
 	"os"
 
-	"mmdb-cli/pkg/output"
+	"github.com/InfraZ/mmdb-cli/pkg/output"
 
 	"github.com/spf13/cobra"
 )
@@ -46,4 +46,5 @@ func init() {
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(metadataCmd)
 	rootCmd.AddCommand(inspectCmd)
+	rootCmd.AddCommand(updateCmd)
 }
