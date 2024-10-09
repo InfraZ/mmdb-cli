@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	version    = "v0.1.0-alpha"
+	version    = "v0.2.0-alpha"
 	maintainer = "The InfraZ Authors"
 )
 
