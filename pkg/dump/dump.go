@@ -33,6 +33,7 @@ type CmdDumpConfig struct {
 /*
 Structure of the dumped JSON dataset:
 {
+	"schema": "v1",
 	"metadata": {
 		<METADATA>
 	}
@@ -48,6 +49,7 @@ Structure of the dumped JSON dataset:
 */
 
 func DumpMMMDB(cfg *CmdDumpConfig) error {
+	// Open the MMDB database file
 	db, err := maxminddb.Open(cfg.InputDatabase)
 	if err != nil {
 		log.Fatalf("[!] Failed to open database: %s - %v", cfg.InputDatabase, err)
@@ -59,12 +61,14 @@ func DumpMMMDB(cfg *CmdDumpConfig) error {
 		return fmt.Errorf("[!] Output file must have a .json extension")
 	}
 
+	// Create the output file
 	outputFile, err := os.Create(cfg.OutputFile)
 	if err != nil {
 		return fmt.Errorf("[!] Failed to create output file: %s - %v", cfg.OutputFile, err)
 	}
 	defer outputFile.Close()
 
+	// Prepare output data
 	outputData := make(map[string]interface{})
 	outputData["schema"] = "v1"
 	outputData["metadata"] = db.Metadata
@@ -75,8 +79,10 @@ func DumpMMMDB(cfg *CmdDumpConfig) error {
 	// Init output data
 	outputData["data"] = make([]map[string]interface{}, 0)
 
+	// Get all available networks
 	availableNetworks := db.Networks()
 
+	// Iterate over all available networks
 	for availableNetworks.Next() {
 
 		dumpPosition++
