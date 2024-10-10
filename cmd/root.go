@@ -29,9 +29,9 @@ var outputOptions output.OutputOptions
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "mmdb-cli",
-	Short: "InfraZ MMDb CLI is a command line tool for managing MMDB",
+	Short: "InfraZ MMDB CLI is a command line toolkit for working with MMDB",
 	Long: `
-InfraZ MMDb CLI is a command line tool for managing MMDB 
+InfraZ MMDB CLI is a command line toolkit for working with MMDB
 Complete documentation is available at https://docs.infraz.io/mmdb-cli`,
 }
 
@@ -47,4 +47,5 @@ func init() {
 	rootCmd.AddCommand(metadataCmd)
 	rootCmd.AddCommand(inspectCmd)
 	rootCmd.AddCommand(updateCmd)
+	rootCmd.AddCommand(dumpCmd)
 }
