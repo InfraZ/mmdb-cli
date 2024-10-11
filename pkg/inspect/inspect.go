@@ -18,6 +18,7 @@ package inspect
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net"
 	"strings"
@@ -30,7 +31,7 @@ type CmdInspectConfig struct {
 	Inputs    []string
 }
 
-func determineLookupNetwork(input string) string {
+func determineLookupNetwork(input string) (string, error) {
 	var lookupNetwork string
 
 	if !strings.Contains(input, "/") {
@@ -39,13 +40,14 @@ func determineLookupNetwork(input string) string {
 		} else if strings.Contains(input, ":") {
 			lookupNetwork = input + "/128"
 		} else {
-			log.Fatal("Invalid input format")
+			err := errors.New("Invalid input")
+			return lookupNetwork, err
 		}
 	} else {
 		lookupNetwork = input
 	}
 
-	return lookupNetwork
+	return lookupNetwork, nil
 }
 
 func mmdbReader(input string) (*maxminddb.Reader, error) {
@@ -87,7 +89,10 @@ func InspectInMMDB(cfg CmdInspectConfig) ([]byte, error) {
 		})
 
 		// Determine the lookup network
-		lookupNetwork := determineLookupNetwork(input)
+		lookupNetwork, err := determineLookupNetwork(input)
+		if err != nil {
+			log.Fatalf("[!] Invalid input: %s", input)
+		}
 
 		// Check if lookupNetwork is valid CIDR
 		_, netIPNet, err := net.ParseCIDR(lookupNetwork)
