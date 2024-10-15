@@ -3,7 +3,7 @@ name: Go Tests
 on: [push]
 
 jobs:
-  build:
+  unitTests:
 
     runs-on: ubuntu-latest
 
