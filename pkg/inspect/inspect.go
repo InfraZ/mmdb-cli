@@ -106,8 +106,8 @@ func InspectInMMDB(cfg CmdInspectConfig) ([]byte, error) {
 		recordsResults := []map[string]interface{}{}
 		// Iterate over the networks in the network list
 		for inputNetworks.Next() {
-			var fuck any
-			address, err := inputNetworks.Network(&fuck)
+			var anyNetwork any
+			address, err := inputNetworks.Network(&anyNetwork)
 			if err != nil {
 				log.Fatal(err)
 			}
