@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0
+### Added
+- Add feature to generate a new MMDB file from JSON file
+
+### Fixed
+- Fix convert record_size issue
+
 ## 0.4.1
 ### Fixed
 - Fix tests issue in CI without MMDB files
