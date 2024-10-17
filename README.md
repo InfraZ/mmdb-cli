@@ -4,6 +4,7 @@
 ![GitHub License](https://img.shields.io/github/license/InfraZ/mmdb-cli)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/InfraZ/mmdb-cli/release.yaml)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/InfraZ/mmdb-cli/tests.yaml)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fmohsenmottaghi%2Fmmdb-cli.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fmohsenmottaghi%2Fmmdb-cli?ref=badge_shield)
 
 MMDB CLI is a command-line open-source project, developed to simplify working with MMDB files. It is a command-line tool that allows you to generate, modify, export, and inspect MMDB files, among other functionalities.
 
@@ -18,6 +19,14 @@ MMDB CLI is a command-line open-source project, developed to simplify working wi
 |  macOS   | arm64 (Apple Silicon) |    ✅     |
 | Windows  |         amd64         |    ✅     |
 | Windows  |         arm64         |    ✅     |
+
+## Documentation
+
+The official documentation for MMDB CLI is available on the
+ [InfraZ Documentation Website](https://docs.infraz.io/docs/mmdb-cli).
+
+> [!TIP]
+> We recommend reading the documentation to get a better understanding of the MMDB CLI and its functionalities.
 
 ## Installation
 
