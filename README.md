@@ -4,7 +4,7 @@
 ![GitHub License](https://img.shields.io/github/license/InfraZ/mmdb-cli)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/InfraZ/mmdb-cli/release.yaml)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/InfraZ/mmdb-cli/tests.yaml)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fmohsenmottaghi%2Fmmdb-cli.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fmohsenmottaghi%2Fmmdb-cli?ref=badge_shield)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FInfraZ%2Fmmdb-cli.svg?type=shield&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2FInfraZ%2Fmmdb-cli?ref=badge_shield&issueType=license)
 
 MMDB CLI is a command-line open-source project, developed to simplify working with MMDB files. It is a command-line tool that allows you to generate, modify, export, and inspect MMDB files, among other functionalities.
 
@@ -82,4 +82,4 @@ Then, you can run the project with the following command:
 ## License
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fmohsenmottaghi%2Fmmdb-cli.svg?type=large&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2Fmohsenmottaghi%2Fmmdb-cli?ref=badge_large&issueType=license)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FInfraZ%2Fmmdb-cli.svg?type=large&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2FInfraZ%2Fmmdb-cli?ref=badge_large&issueType=license)
