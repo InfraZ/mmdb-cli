@@ -19,12 +19,8 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/InfraZ/mmdb-cli/internal/metadata"
 	"github.com/spf13/cobra"
-)
-
-const (
-	version    = "v0.5.0"
-	maintainer = "The InfraZ Authors"
 )
 
 const (
@@ -39,6 +35,16 @@ var versionCmd = &cobra.Command{
 	Short: versionCmdShortDesc,
 	Long:  versionCmdLongDesc,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Version: \t%s\nMaintainer: \t%s\n", version, maintainer)
+
+		fmt.Printf("Version: %s\n", metadata.Version)
+		fmt.Printf("Licence: %s\n", metadata.License)
+		fmt.Printf("Description: %s\n", metadata.ShortDescription)
+		fmt.Printf("Documentation: %s\n", metadata.DocumentationURL)
+		fmt.Println("Maintainers:")
+		for _, maintainer := range metadata.Maintainers {
+			fmt.Printf("\t- %s\n", maintainer)
+		}
+		fmt.Printf("\nPlease support us by starring the project on GitHub: %s\n", metadata.Homepage)
+
 	},
 }

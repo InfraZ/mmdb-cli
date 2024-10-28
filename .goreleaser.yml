@@ -1,6 +1,10 @@
 # yaml-language-server: $schema=https://goreleaser.com/static/schema-pro.json
 version: 2
 
+before:
+  hooks:
+    - bash .github/pre-release-hook.sh
+
 builds:
   - env:
       - CGO_ENABLED=0
