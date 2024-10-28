@@ -20,13 +20,31 @@ nfpms:
   - file_name_template: '{{ .PackageName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}'
     homepage: https://infraz.io
     description: |
-      InfraZ MMDB-CLI is a toolkit for working with MMDB files
+      InfraZ MMDB-CLI is a command-line toolkit to work with MMDB files,
+      It empowers you to create, transform, export, and explore MMDB files
     maintainer: Mohsen Mottaghi <mohsen@infraz.io>
     license: Apache-2.0
     formats:
-      - apk
       - deb
       - rpm
+      - apk
+    deb:
+      signature:
+        key_file: "{{ .Env.GPG_PRIVATE_KEY_PATH }}"
+        type: origin
+      fields:
+        Bugs: https://github.com/InfraZ/mmdb-cli/issues
+    rpm:
+      packager: InfraZ Packages <packages@infraz.io>
+      signature:
+        key_file: "{{ .Env.GPG_PRIVATE_KEY_PATH }}"
+
+signs:
+  - artifacts: all
+    signature: "${artifact}.gpgsig"
+    id: gpg
+    cmd: gpg2
+    args: ["--batch", "-u", "{{ .Env.GPG_FINGERPRINT }}", "--output", "${signature}", "--detach-sign", "${artifact}" ]
 
 changelog:
   sort: asc
@@ -65,3 +83,4 @@ changelog:
 
 checksum:
   name_template: "checksums.txt"
+  algorithm: sha256
