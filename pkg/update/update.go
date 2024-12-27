@@ -18,6 +18,7 @@ package update
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net"
@@ -26,6 +27,7 @@ import (
 	"github.com/maxmind/mmdbwriter"
 	"github.com/maxmind/mmdbwriter/inserter"
 
+	"github.com/InfraZ/mmdb-cli/internal/files"
 	"github.com/InfraZ/mmdb-cli/pkg/mmdb"
 )
 
@@ -33,6 +35,7 @@ type CmdUpdateConfig struct {
 	InputDatabase  string
 	InputDataSet   string
 	OutputDatabase string
+	Verbose        bool
 }
 
 func readDataSet(inputDataSet string) ([]map[string]interface{}, error) {
@@ -63,6 +66,17 @@ func readDataSet(inputDataSet string) ([]map[string]interface{}, error) {
 
 func UpdateMMDB(cfg CmdUpdateConfig) error {
 
+	// Validate files
+	filesToCheck := []files.FilesListValidation{
+		{FilePath: cfg.InputDataSet, ExpectedExtension: ".json", ShouldExist: true},
+		{FilePath: cfg.InputDatabase, ExpectedExtension: ".mmdb", ShouldExist: true},
+		{FilePath: cfg.OutputDatabase, ExpectedExtension: ".mmdb", ShouldExist: false},
+	}
+
+	if err := files.FilesValidation(filesToCheck); err != nil {
+		log.Fatal(err)
+	}
+
 	var dataset []map[string]interface{}
 	dataset, err := readDataSet(cfg.InputDataSet)
 	if err != nil {
@@ -79,6 +93,9 @@ func UpdateMMDB(cfg CmdUpdateConfig) error {
 		log.Fatal(err)
 	}
 
+	fmt.Println("[+] Starting update mmdb with dataset")
+
+	// Iterate over the dataset
 	for _, updateRequest := range dataset {
 		updatePosition++
 
@@ -135,11 +152,20 @@ func UpdateMMDB(cfg CmdUpdateConfig) error {
 				log.Fatalf("[!] Error deep merging data for record %d (network: %s) - %v", updatePosition, network, err)
 			}
 		default:
-			log.Fatalf("[!] Unsupported method %s for record %d (supported: remove, replace, top_level_merge, deep_merge)", method, updatePosition)
+			log.Fatalf("[!] Unsupported method '%s' for record %d (supported: remove, replace, top_level_merge, deep_merge)", method, updatePosition)
 		}
 
+		if cfg.Verbose {
+			fmt.Printf("[+] %d/%d dataset records processed - Data: %v\n", updatePosition, len(dataset), dynamicMmdbData)
+		} else {
+			fmt.Printf("\r[+] %d/%d dataset records processed", updatePosition, len(dataset))
+		}
 	}
 
+	fmt.Printf("\r[+] %d Dataset records processed\n", updatePosition)
+
+	// Write the updated MMDB to a file
+	fmt.Printf("[+] Writing updated MMDB to file")
 	outputFile, err := os.Create(cfg.OutputDatabase)
 	if err != nil {
 		return err
@@ -149,6 +175,14 @@ func UpdateMMDB(cfg CmdUpdateConfig) error {
 	if _, err = writer.WriteTo(outputFile); err != nil {
 		return err
 	}
+
+	fileSize, err := files.CheckFileSizeMb(cfg.OutputDatabase)
+	if err != nil {
+		return fmt.Errorf("failed to check output file size: %w", err)
+	}
+	fmt.Printf("\r[+] %s file size: %.2f MB\n", cfg.OutputDatabase, fileSize)
+
+	fmt.Println("[+] MMDB updated successfully")
 
 	return nil
 }

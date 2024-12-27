@@ -23,5 +23,5 @@ const OrganizationWebsite = "https://infraz.io"
 
 // Maintainers is the list of maintainers of the CLI
 var Maintainers = []string{
-	"Mohsen Mottaghi <mohsen@infraz.io>",
+	"Mohsen Mottaghi <mohsenmottaghi@infraz.io>",
 }

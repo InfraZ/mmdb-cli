@@ -37,7 +37,7 @@ var cmdInspectConfig inspect.CmdInspectConfig
 var inspectCmd = &cobra.Command{
 	Use:   inspectCmdName,
 	Short: inspectCmdShortDesc,
-	Long:  inspectCmdLongDesc,
+	Long:  inspectCmdLongDesc + "\n\nArgs:\n  [IP/CIDR]  IP address or CIDR to inspect in the MMDB file, It can be a single or multiple IP addresses or CIDRs",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Set the inputs
 		cmdInspectConfig.Inputs = cmd.Flags().Args()
@@ -58,6 +58,8 @@ func init() {
 	// Add flags to the inspect command
 	inspectCmd.Flags().StringVarP(&cmdInspectConfig.InputFile, "input", "i", "", "Input path of the MMDB file")
 	inspectCmd.Flags().StringVarP(&outputOptions.Format, "format", "f", "yaml", "Output format (yaml, json, json-pretty)")
+
+	inspectCmd.Args = cobra.MinimumNArgs(1)
 
 	// Mark required flags
 	inspectCmd.MarkFlagRequired("input")

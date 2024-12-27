@@ -24,6 +24,7 @@ import (
 	"net"
 	"os"
 
+	"github.com/InfraZ/mmdb-cli/internal/files"
 	"github.com/InfraZ/mmdb-cli/pkg/mmdb"
 	"github.com/maxmind/mmdbwriter"
 )
@@ -182,6 +183,15 @@ func initializeMMDBWriter(cfg *CmdGenerateConfig, metadata map[string]interface{
 }
 
 func GenerateMMDB(cfg *CmdGenerateConfig) error {
+
+	// Validate files
+	filesToCheck := []files.FilesListValidation{
+		{FilePath: cfg.InputDataset, ExpectedExtension: ".json", ShouldExist: true},
+	}
+
+	if err := files.FilesValidation(filesToCheck); err != nil {
+		log.Fatal(err)
+	}
 
 	// Initialize the record position
 	var recordPosition int = 0
