@@ -28,6 +28,7 @@ import (
 type CmdDumpConfig struct {
 	InputDatabase string
 	OutputFile    string
+	Verbose       bool
 }
 
 /*
@@ -68,6 +69,8 @@ func DumpMMMDB(cfg *CmdDumpConfig) error {
 	}
 	defer outputFile.Close()
 
+	fmt.Printf("[+] Start dumping %s to %s\n", cfg.InputDatabase, cfg.OutputFile)
+
 	// Prepare output data
 	outputData := make(map[string]interface{})
 	outputData["schema"] = "v1"
@@ -99,18 +102,34 @@ func DumpMMMDB(cfg *CmdDumpConfig) error {
 
 		outputData["data"] = append(outputData["data"].([]map[string]interface{}), data)
 
-		fmt.Printf("\r[+] Dumped %d records", dumpPosition)
+		if cfg.Verbose {
+			fmt.Printf("[-] Dumping record %d for network %s - data: %v\n", dumpPosition, subnet.String(), record)
+		} else {
+			fmt.Printf("\r[-] Dumped records: %d", dumpPosition)
+		}
 
 	}
 
+	fmt.Printf("\r[+] Total %d records dumped successfully\n", dumpPosition)
+
 	// Write the output data to the file
+	fmt.Printf("[+] Writing output data to %s", cfg.OutputFile)
 	encoder := json.NewEncoder(outputFile)
 	err = encoder.Encode(outputData)
 	if err != nil {
 		return fmt.Errorf("[!] Failed to write output data to file: %s - %v", cfg.OutputFile, err)
 	}
 
-	fmt.Println("\n[+] MMDB dumped successfully")
+	// check the output file size
+	outputFileStat, err := outputFile.Stat()
+	if err != nil {
+		return fmt.Errorf("[!] Failed to get output file stats: %s - %v", cfg.OutputFile, err)
+	}
+
+	// convert outputFileStat.Size() to MB
+	outputFileSizeMB := float64(outputFileStat.Size()) / 1024 / 1024
+
+	fmt.Printf("\r[+] MMDB dumped successfully with size: %.2f MB\n", outputFileSizeMB)
 
 	return nil
 }
