@@ -48,6 +48,7 @@ func init() {
 	// Add flags to the update command
 	dumpCmd.Flags().StringVarP(&cmdDumpConfig.InputDatabase, "input", "i", "", "Input path of the MMDB file")
 	dumpCmd.Flags().StringVarP(&cmdDumpConfig.OutputFile, "output", "o", "", "Output path of the output JSON dataset file (must have a .json extension)")
+	dumpCmd.Flags().BoolVarP(&cmdDumpConfig.Verbose, "verbose", "v", false, "Verbose mode")
 
 	// Mark required flags
 	dumpCmd.MarkFlagRequired("input")
