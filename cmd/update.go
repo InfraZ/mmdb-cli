@@ -50,6 +50,7 @@ func init() {
 	updateCmd.Flags().StringVarP(&cmdUpdateConfig.InputDatabase, "input", "i", "", "Input path of the MMDB file")
 	updateCmd.Flags().StringVarP(&cmdUpdateConfig.InputDataSet, "dataset", "d", "", "Input path of the dataset file")
 	updateCmd.Flags().StringVarP(&cmdUpdateConfig.OutputDatabase, "output", "o", "", "Output path of the MMDB file")
+	updateCmd.Flags().BoolVarP(&cmdUpdateConfig.Verbose, "verbose", "v", false, "Enable verbose mode")
 
 	// Mark required flags
 	updateCmd.MarkFlagRequired("input")

@@ -22,6 +22,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/InfraZ/mmdb-cli/internal/files"
 	"github.com/oschwald/maxminddb-golang"
 )
 
@@ -50,6 +51,17 @@ Structure of the dumped JSON dataset:
 */
 
 func DumpMMMDB(cfg *CmdDumpConfig) error {
+
+	// Validate files
+	filesToCheck := []files.FilesListValidation{
+		{FilePath: cfg.InputDatabase, ExpectedExtension: ".mmdb", ShouldExist: true},
+		{FilePath: cfg.OutputFile, ExpectedExtension: ".json", ShouldExist: false},
+	}
+
+	if err := files.FilesValidation(filesToCheck); err != nil {
+		log.Fatal(err)
+	}
+
 	// Open the MMDB database file
 	db, err := maxminddb.Open(cfg.InputDatabase)
 	if err != nil {
