@@ -128,8 +128,9 @@ func DumpMMMDB(cfg *CmdDumpConfig) error {
 
 	// convert outputFileStat.Size() to MB
 	outputFileSizeMB := float64(outputFileStat.Size()) / 1024 / 1024
+	fmt.Printf("\r[+] %s file created with size: %.2f MB\n", cfg.OutputFile, outputFileSizeMB)
 
-	fmt.Printf("\r[+] MMDB dumped successfully with size: %.2f MB\n", outputFileSizeMB)
+	fmt.Println("[+] MMDB Dumped successfully")
 
 	return nil
 }
