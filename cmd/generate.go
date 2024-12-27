@@ -48,6 +48,7 @@ func init() {
 	// Add flags to the update command
 	generateCmd.Flags().StringVarP(&cmdGenerateConfig.InputDataset, "input", "i", "", "Input path of the JSON dataset file (must have a .json extension)")
 	generateCmd.Flags().StringVarP(&cmdGenerateConfig.OutputDatabase, "output", "o", "", "Output path of the MMDB database file (must have a .mmdb extension)")
+	generateCmd.Flags().BoolVarP(&cmdGenerateConfig.Verbose, "verbose", "v", false, "Enable verbose mode")
 
 	generateCmd.Flags().BoolVar(&cmdGenerateConfig.DisableIPv4Aliasing, "disable-ipv4-aliasing", false, "Disable IPv4 aliasing")
 	generateCmd.Flags().BoolVar(&cmdGenerateConfig.IncludeReservedNetworks, "include-reserved-networks", false, "Include reserved networks")

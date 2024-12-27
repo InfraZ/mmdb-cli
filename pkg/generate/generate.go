@@ -31,6 +31,7 @@ import (
 type CmdGenerateConfig struct {
 	InputDataset   string
 	OutputDatabase string
+	Verbose        bool
 
 	DisableIPv4Aliasing     bool
 	IncludeReservedNetworks bool
@@ -84,13 +85,13 @@ func mmdbWriterOptions(cfg *CmdGenerateConfig, metadata map[string]interface{}) 
 
 	// BuildEpoch
 	if metadata["BuildEpoch"] != nil {
-		log.Printf("[-] BuildEpoch in metadata will be ignored")
+		fmt.Println("[-] BuildEpoch in metadata will be ignored")
 	}
 
 	// DatabaseType
 	var databaseType string
 	if metadata["DatabaseType"] == nil {
-		log.Fatalf("[!] DatabaseType is a required field in metadata")
+		log.Fatalf("\n[!] DatabaseType is a required field in metadata")
 	} else {
 		databaseType = metadata["DatabaseType"].(string)
 	}
@@ -98,7 +99,7 @@ func mmdbWriterOptions(cfg *CmdGenerateConfig, metadata map[string]interface{}) 
 	// Description
 	description := make(map[string]string)
 	if metadata["Description"] == nil {
-		log.Fatalf("[!] Description is a required field in metadata")
+		log.Fatalf("\n[!] Description is a required field in metadata")
 	} else {
 		// Convert the description map[string]interface {} to map[string]string
 		for descriptionKey, descriptionValue := range metadata["Description"].(map[string]interface{}) {
@@ -112,13 +113,13 @@ func mmdbWriterOptions(cfg *CmdGenerateConfig, metadata map[string]interface{}) 
 		// Default to IPv6
 		metadata["IPVersion"] = 6
 
-		log.Printf("[-] IPVersion is not provided in metadata, defaulting to 6 (An IPv6 database supports both IPv4 and IPv6 lookups)")
+		fmt.Println("[-] IPVersion is not provided in metadata, defaulting to 6 (An IPv6 database supports both IPv4 and IPv6 lookups)")
 	} else {
 		// Convert the IPVersion to int
 		ipVersion = int(metadata["IPVersion"].(float64))
 
 		if ipVersion != 4 && ipVersion != 6 {
-			log.Fatalf("[!] Invalid value for IPVersion in metadata. The supported values are 4 and 6")
+			log.Fatalf("\n[!] Invalid value for IPVersion in metadata. The supported values are 4 and 6")
 		}
 	}
 
@@ -128,7 +129,7 @@ func mmdbWriterOptions(cfg *CmdGenerateConfig, metadata map[string]interface{}) 
 		// Default to English
 		languages = append(languages, "en")
 
-		log.Printf("[-] Languages is not provided in metadata, defaulting to English")
+		fmt.Println("[-] Languages is not provided in metadata, defaulting to English")
 	} else {
 		// Convert the languages []interface {} to []string
 		for _, language := range metadata["Languages"].([]interface{}) {
@@ -141,13 +142,13 @@ func mmdbWriterOptions(cfg *CmdGenerateConfig, metadata map[string]interface{}) 
 		// Default to 28
 		recordSize = 28
 
-		log.Printf("[-] RecordSize is not provided in metadata, defaulting to 28 (The supported values are 24, 28, and 32)")
+		fmt.Println("[-] RecordSize is not provided in metadata, defaulting to 28 (The supported values are 24, 28, and 32)")
 	} else {
 		// Convert the RecordSize to int
 		recordSize = int(metadata["RecordSize"].(float64))
 
 		if recordSize != 24 && recordSize != 28 && recordSize != 32 {
-			log.Fatalf("[!] Invalid value for RecordSize in metadata. The supported values are 24, 28, and 32")
+			log.Fatalf("\n[!] Invalid value for RecordSize in metadata. The supported values are 24, 28, and 32")
 		}
 	}
 
@@ -169,12 +170,12 @@ func initializeMMDBWriter(cfg *CmdGenerateConfig, metadata map[string]interface{
 
 	mmdbWriterOptions, err := mmdbWriterOptions(cfg, metadata)
 	if err != nil {
-		log.Fatalf("[!] Error initializing MMDB writer options: %v", err)
+		log.Fatalf("\n[!] Error initializing MMDB writer options: %v", err)
 	}
 
 	writer, err := mmdbwriter.New(*mmdbWriterOptions)
 	if err != nil {
-		log.Fatalf("[!] Error initializing MMDB writer: %v", err)
+		log.Fatalf("\n[!] Error initializing MMDB writer: %v", err)
 	}
 
 	return writer, err
@@ -189,7 +190,7 @@ func GenerateMMDB(cfg *CmdGenerateConfig) error {
 	var dataset map[string]interface{}
 	dataset, err := readDataSet(cfg.InputDataset)
 	if err != nil {
-		log.Fatalf("[!] Error reading dataset: %v", err)
+		log.Fatalf("\n[!] Error reading dataset: %v", err)
 	}
 
 	// Extract metadata from the dataset
@@ -198,7 +199,7 @@ func GenerateMMDB(cfg *CmdGenerateConfig) error {
 	// Initialize the MMDB writer
 	writer, err := initializeMMDBWriter(cfg, metadata.(map[string]interface{}))
 	if err != nil {
-		log.Fatalf("[!] Error initializing MMDB writer: %v", err)
+		log.Fatalf("\n[!] Error initializing MMDB writer: %v", err)
 	}
 
 	// Iterate over the dataset and write to the MMDB
@@ -212,26 +213,30 @@ func GenerateMMDB(cfg *CmdGenerateConfig) error {
 		// Record network
 		_, network, err := net.ParseCIDR(dataMap["network"].(string))
 		if err != nil {
-			log.Fatalf("[!] Invalid network (%s) in the dataset: %v", dataMap["network"].(string), err)
+			log.Fatalf("\n[!] Invalid network (%s) in the dataset: %v", dataMap["network"].(string), err)
 		}
 
 		// Parse dynamic data
 		dynamicData, exists := dataMap["record"].(map[string]interface{})
 		if !exists {
-			log.Fatalf("[!] Error parsing data for record %d (network: %s) - %v", recordPosition, network, err)
+			log.Fatalf("\n[!] Error parsing data for record %d (network: %s) - %v", recordPosition, network, err)
 		}
 
 		// Convert dynamic data to MMDB type map
 		dynamicMmdbData := mmdb.ConvertToMMDBTypeMap(dynamicData)
 
 		if err := writer.Insert(network, dynamicMmdbData); err != nil {
-			log.Fatalf("[!] Error inserting record %d (network: %s) - %v", recordPosition, network, err)
+			log.Fatalf("\n[!] Error inserting record %d (network: %s) - %v", recordPosition, network, err)
 		}
 
-		fmt.Printf("\r[+] Inserted %d records", recordPosition)
+		if cfg.Verbose {
+			fmt.Printf("[-] Inserting record %d for network %s - data: %v\n", recordPosition, network, dynamicMmdbData)
+		} else {
+			fmt.Printf("\r[-] Inserted %d records", recordPosition)
+		}
 	}
-	fmt.Printf("\r")
-	log.Printf("[+] Total records inserted: %d", recordPosition)
+
+	fmt.Printf("\r[+] Total records inserted: %d\n", recordPosition)
 
 	// Write the MMDB database to the output file
 	outputFile, err := os.Create(cfg.OutputDatabase)
@@ -241,13 +246,22 @@ func GenerateMMDB(cfg *CmdGenerateConfig) error {
 	defer outputFile.Close()
 
 	// Write the MMDB database to the output file
-	log.Println("[+] Writing MMDB database to the output file")
+	fmt.Println("[+] Writing MMDB database to the output file")
 	if _, err = writer.WriteTo(outputFile); err != nil {
 		return err
 	}
-	if err == nil {
-		log.Println("[+] MMDB generated successfully")
+
+	// check the output file size
+	outputDatabaseStat, err := outputFile.Stat()
+	if err != nil {
+		return fmt.Errorf("[!] Failed to get output file stats: %s - %v", cfg.OutputDatabase, err)
 	}
+
+	// convert outputDatabaseStat.Size() to MB
+	outputDatabaseSizeMB := float64(outputDatabaseStat.Size()) / 1024 / 1024
+	fmt.Printf("\r[+] %s file created with size: %.2f MB\n", cfg.OutputDatabase, outputDatabaseSizeMB)
+
+	fmt.Println("[+] MMDB Generated successfully")
 
 	return err
 }
