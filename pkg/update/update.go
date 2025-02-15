@@ -36,6 +36,9 @@ type CmdUpdateConfig struct {
 	InputDataSet   string
 	OutputDatabase string
 	Verbose        bool
+
+	DisableIPv4Aliasing     bool
+	IncludeReservedNetworks bool
 }
 
 func readDataSet(inputDataSet string) ([]map[string]interface{}, error) {
@@ -88,7 +91,10 @@ func UpdateMMDB(cfg CmdUpdateConfig) error {
 		updatePosition int
 	)
 
-	writer, err := mmdbwriter.Load(cfg.InputDatabase, mmdbwriter.Options{})
+	writer, err := mmdbwriter.Load(cfg.InputDatabase, mmdbwriter.Options{
+		DisableIPv4Aliasing:     cfg.DisableIPv4Aliasing,
+		IncludeReservedNetworks: cfg.IncludeReservedNetworks,
+	})
 	if err != nil {
 		log.Fatal(err)
 	}
