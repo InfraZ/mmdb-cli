@@ -52,6 +52,9 @@ func init() {
 	updateCmd.Flags().StringVarP(&cmdUpdateConfig.OutputDatabase, "output", "o", "", "Output path of the MMDB file")
 	updateCmd.Flags().BoolVarP(&cmdUpdateConfig.Verbose, "verbose", "v", false, "Enable verbose mode")
 
+	updateCmd.Flags().BoolVar(&cmdUpdateConfig.DisableIPv4Aliasing, "disable-ipv4-aliasing", false, "Disable IPv4 aliasing")
+	updateCmd.Flags().BoolVar(&cmdUpdateConfig.IncludeReservedNetworks, "include-reserved-networks", false, "Include reserved networks")
+
 	// Mark required flags
 	updateCmd.MarkFlagRequired("input")
 	updateCmd.MarkFlagRequired("dataset")
