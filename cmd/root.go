@@ -49,4 +49,5 @@ func init() {
 	rootCmd.AddCommand(updateCmd)
 	rootCmd.AddCommand(dumpCmd)
 	rootCmd.AddCommand(generateCmd)
+	rootCmd.AddCommand(verifyCmd)
 }
