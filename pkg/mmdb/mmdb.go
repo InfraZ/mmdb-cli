@@ -39,7 +39,7 @@ func ConvertToMMDBTypeMap(data map[string]interface{}) mmdbtype.Map {
 			// Recursively convert nested maps
 			mmdbMap[mmdbKey] = ConvertToMMDBTypeMap(mmdbValue)
 		default:
-			log.Printf("Unsupported data type for key %s", key)
+			log.Printf("Unsupported data type for key %v", key)
 		}
 	}
 	return mmdbMap
