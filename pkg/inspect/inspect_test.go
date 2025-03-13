@@ -19,7 +19,6 @@ package inspect
 import (
 	"encoding/json"
 	"net"
-	"os"
 	"testing"
 )
 
@@ -45,11 +44,7 @@ func TestDetermineLookupNetwork(t *testing.T) {
 }
 
 func TestMMDBReader(t *testing.T) {
-	// Skip test if running on GitHub Actions as the test requires the GeoLite2-Country.mmdb file
-	if os.Getenv("CI") == "true" {
-		t.Skip("Skipping test; running on GitHub Actions")
-	}
-	testInput := "../../output/GeoLite2-Country.mmdb"
+	testInput := "../../test/inspect.mmdb"
 
 	_, err := mmdbReader(testInput)
 	if err != nil {
@@ -58,11 +53,7 @@ func TestMMDBReader(t *testing.T) {
 }
 
 func TestMMDBLookup(t *testing.T) {
-	// Skip test if running on GitHub Actions as the test requires the GeoLite2-Country.mmdb file
-	if os.Getenv("CI") == "true" {
-		t.Skip("Skipping test; running on GitHub Actions")
-	}
-	testInput := "../../output/GeoLite2-Country.mmdb"
+	testInput := "../../test/inspect.mmdb"
 	testsData := []struct {
 		query    string
 		expected string
