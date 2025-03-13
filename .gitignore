@@ -23,6 +23,7 @@ go.work.sum
 
 # MMDB files
 *.mmdb
+!test/*.mmdb
 
 # Binary files
 mmdb-cli
@@ -30,4 +31,3 @@ mmdb-cli
 # Output files
 output/
 !pkg/output
-test/

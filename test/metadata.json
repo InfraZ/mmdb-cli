@@ -1,0 +1,46 @@
+{
+  "schema": "v1",
+  "metadata": {
+    "Description": {
+      "en": "MMDB CLI Metadata Test"
+    },
+    "DatabaseType": "Metadata Test",
+    "Languages": [
+      "de",
+      "en",
+      "es",
+      "fr",
+      "ja",
+      "pt-BR",
+      "ru",
+      "zh-CN"
+    ],
+    "BinaryFormatMajorVersion": 2,
+    "BinaryFormatMinorVersion": 0,
+    "BuildEpoch": 1726249063,
+    "IPVersion": 6,
+    "NodeCount": 1234259,
+    "RecordSize": 24
+  },
+  "data": [
+    {
+      "network": "::100:0/120",
+      "record": {
+        "registered_country": {
+          "geoname_id": 2077456,
+          "iso_code": "AU",
+          "names": {
+            "de": "Australien",
+            "en": "Australia",
+            "es": "Australia",
+            "fr": "Australie",
+            "ja": "オーストラリア",
+            "pt-BR": "Austrália",
+            "ru": "Австралия",
+            "zh-CN": "澳大利亚"
+          }
+        }
+      }
+    }
+  ]
+}
