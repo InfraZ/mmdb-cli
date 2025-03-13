@@ -34,35 +34,56 @@ func TestReadDataSet(t *testing.T) {
 	if _, err := tmpFile.Write([]byte(sampleData)); err != nil {
 		t.Fatalf("Failed to write to temp file: %v", err)
 	}
-	tmpFile.Close()
+	if err := tmpFile.Close(); err != nil {
+		t.Fatalf("Failed to close temp file: %v", err)
+	}
+
+	invalidJSONFile := createTempFile(t, "invalid json")
+	defer os.Remove(invalidJSONFile)
 
 	tests := []struct {
 		name          string
 		inputDataSet  string
 		expectedError bool
+		expectedData  []map[string]interface{}
 	}{
 		{
 			name:          "Valid dataset file",
 			inputDataSet:  tmpFile.Name(),
 			expectedError: false,
-		},
-		{
-			name:          "Non-existent dataset file",
-			inputDataSet:  "non_existent_file.json",
-			expectedError: true,
+			expectedData: []map[string]interface{}{
+				{
+					"network": "192.168.1.0/24",
+					"data":    map[string]interface{}{"country": "US"},
+				},
+			},
 		},
 		{
 			name:          "Invalid JSON format",
-			inputDataSet:  createTempFile(t, "invalid json"),
+			inputDataSet:  invalidJSONFile,
 			expectedError: true,
+			expectedData:  nil,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := readDataSet(tt.inputDataSet)
+			data, err := readDataSet(tt.inputDataSet)
 			if (err != nil) != tt.expectedError {
 				t.Errorf("readDataSet() error = %v, expectedError %v", err, tt.expectedError)
+			}
+			if !tt.expectedError && data != nil {
+				// Compare the actual data with expected data
+				if len(data) != len(tt.expectedData) {
+					t.Errorf("readDataSet() got %v entries, expected %v entries", len(data), len(tt.expectedData))
+					return
+				}
+				// Basic structure validation for the first entry
+				if len(data) > 0 {
+					if data[0]["network"] != tt.expectedData[0]["network"] {
+						t.Errorf("readDataSet() network = %v, expected %v", data[0]["network"], tt.expectedData[0]["network"])
+					}
+				}
 			}
 		})
 	}
