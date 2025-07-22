@@ -1,0 +1,35 @@
+{
+    "version": "v1",
+    "dataset": [
+      {
+        "network": "100.64.0.0/10",
+        "method": "deep_merge",
+        "data": {
+          "autonomous_system_number": 99999,
+          "autonomous_system_organization": "CGNAT",
+          "test_1": {
+            "int32": 12345,
+            "uint32": 12345,
+            "float": 1.111,
+            "bool": true,
+            "string": "test2",
+            "object": {
+              "key1": "value1",
+              "key2": "value2"
+            }
+          },
+          "test_2": {
+            "int32": 12345,
+            "uint32": 12345,
+            "float": 1.111,
+            "bool": true,
+            "string": "test2",
+            "object": {
+              "key1": "value1",
+              "key2": "value2"
+            }
+          }
+        }
+      }
+    ]
+  }

@@ -1,0 +1,42 @@
+{
+    "version": "v1",
+    "schema": {
+        "key_int": "int32",
+        "key_uint": "uint32"
+    },
+    "metadata": {
+        "Description": {
+            "en": "Custom ASN database"
+        },
+        "DatabaseType": "Custom-ASN",
+        "Languages": [
+            "en"
+        ],
+        "BinaryFormatMajorVersion": 2,
+        "BinaryFormatMinorVersion": 0,
+        "BuildEpoch": 1728288921,
+        "IPVersion": 6,
+        "NodeCount": 1056663,
+        "RecordSize": 24
+    },
+    "dataset": [
+        {
+            "network": "1.1.1.0/24",
+            "record": {
+                "key_1": "value_1",
+                "key_2": "value_2",
+                "key_string": "value_string",
+                "key_int": 12345,
+                "key_uint": 12345,
+                "key_float": 1.111,
+                "key_bool": true,
+                "key_object": {
+                    "key_1": "value_1",
+                    "key_2": {
+                        "key_3": "value_3"
+                    }
+                }
+            }
+        }
+    ]
+}

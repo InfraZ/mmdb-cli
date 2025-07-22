@@ -41,7 +41,7 @@ type CmdUpdateConfig struct {
 	IncludeReservedNetworks bool
 }
 
-func readDataSet(inputDataSet string) ([]map[string]interface{}, error) {
+func readJsonInput(inputDataSet string) (map[string]interface{}, error) {
 	_, err := os.Stat(inputDataSet)
 	if os.IsNotExist(err) {
 		log.Fatalf("File %s does not exist", inputDataSet)
@@ -59,12 +59,58 @@ func readDataSet(inputDataSet string) ([]map[string]interface{}, error) {
 		return nil, err
 	}
 
-	var dataset []map[string]interface{}
+	var dataset map[string]interface{}
 	if err := json.Unmarshal(byteValue, &dataset); err != nil {
 		return nil, err
 	}
 
 	return dataset, nil
+}
+
+func parseInputData(inputDataSet string) ([]map[string]interface{}, map[string]interface{}, string, error) {
+	inputData, err := readJsonInput(inputDataSet)
+	if err != nil {
+		return nil, nil, "", fmt.Errorf("error reading dataset: %w", err)
+	}
+
+	// Handle the dataset field
+	datasetInterface, exists := inputData["dataset"]
+	if !exists {
+		return nil, nil, "", fmt.Errorf("no 'dataset' field found in input data")
+	}
+
+	datasetSlice, ok := datasetInterface.([]interface{})
+	if !ok {
+		return nil, nil, "", fmt.Errorf("dataset field is not an array")
+	}
+
+	// Convert []interface{} to []map[string]interface{}
+	inputDataDataset := make([]map[string]interface{}, len(datasetSlice))
+	for i, item := range datasetSlice {
+		itemMap, ok := item.(map[string]interface{})
+		if !ok {
+			return nil, nil, "", fmt.Errorf("dataset item %d is not a valid object", i+1)
+		}
+		inputDataDataset[i] = itemMap
+	}
+
+	// Handle the schema field
+	var inputDataSchema map[string]interface{}
+	if schemaInterface, exists := inputData["schema"]; exists {
+		if schema, ok := schemaInterface.(map[string]interface{}); ok {
+			inputDataSchema = schema
+		}
+	}
+
+	// Handle the version field
+	var inputDataVersion string
+	if versionInterface, exists := inputData["version"]; exists {
+		if version, ok := versionInterface.(string); ok {
+			inputDataVersion = version
+		}
+	}
+
+	return inputDataDataset, inputDataSchema, inputDataVersion, nil
 }
 
 func UpdateMMDB(cfg CmdUpdateConfig) error {
@@ -80,10 +126,26 @@ func UpdateMMDB(cfg CmdUpdateConfig) error {
 		log.Fatal(err)
 	}
 
-	var dataset []map[string]interface{}
-	dataset, err := readDataSet(cfg.InputDataSet)
+	inputDataDataset, inputDataSchema, inputDataVersion, err := parseInputData(cfg.InputDataSet)
 	if err != nil {
-		log.Fatalf("Error reading dataset: %v", err)
+		log.Fatalf("Error parsing input data: %v", err)
+	}
+
+	// Validate and log version information if present
+	if inputDataVersion != "" {
+		if inputDataVersion != "v1" {
+			log.Fatalf("[!] Unsupported version: %s (supported: v1)", inputDataVersion)
+		}
+		fmt.Printf("[+] Dataset version: %s\n", inputDataVersion)
+	}
+
+	// Handle schema information
+	var useDefaultSchema bool = true
+	if inputDataSchema != nil {
+		fmt.Printf("[+] Dataset schema: %v\n", inputDataSchema)
+		useDefaultSchema = false
+	} else {
+		fmt.Println("[-] No schema found in input data, using default schema")
 	}
 
 	var (
@@ -102,7 +164,7 @@ func UpdateMMDB(cfg CmdUpdateConfig) error {
 	fmt.Println("[+] Starting update mmdb with dataset")
 
 	// Iterate over the dataset
-	for _, updateRequest := range dataset {
+	for _, updateRequest := range inputDataDataset {
 		updatePosition++
 
 		// Check if network is present
@@ -128,7 +190,7 @@ func UpdateMMDB(cfg CmdUpdateConfig) error {
 			log.Fatalf("[!] Error parsing data for record %d (network: %s) - %v", updatePosition, network, err)
 		}
 
-		dynamicMmdbData := mmdb.ConvertToMMDBTypeMap(dynamicData)
+		dynamicMmdbData := mmdb.ConvertToMMDBTypeMap(dynamicData, useDefaultSchema, inputDataSchema)
 
 		// Switch to select the type of update
 		method, isMethodPresent := updateRequest["method"].(string)
@@ -162,9 +224,9 @@ func UpdateMMDB(cfg CmdUpdateConfig) error {
 		}
 
 		if cfg.Verbose {
-			fmt.Printf("[+] %d/%d dataset records processed - Data: %v\n", updatePosition, len(dataset), dynamicMmdbData)
+			fmt.Printf("[+] %d/%d dataset records processed - Data: %v\n", updatePosition, len(inputDataDataset), dynamicMmdbData)
 		} else {
-			fmt.Printf("\r[+] %d/%d dataset records processed", updatePosition, len(dataset))
+			fmt.Printf("\r[+] %d/%d dataset records processed", updatePosition, len(inputDataDataset))
 		}
 	}
 
