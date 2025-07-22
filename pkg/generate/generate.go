@@ -41,11 +41,14 @@ type CmdGenerateConfig struct {
 /*
 Structure of the dumped JSON dataset:
 {
-	"schema": "v1",
+	"version": "v1",
+	"schema": {
+		<SCHEMA>
+	},
 	"metadata": {
 		<METADATA>
-	}
-	"data": [
+	},
+	"dataset": [
 		{
 			"network": "<NETWORK>",
 			"record": {
@@ -206,6 +209,32 @@ func GenerateMMDB(cfg *CmdGenerateConfig) error {
 	// Extract metadata from the dataset
 	metadata := dataset["metadata"]
 
+	// Extract schema from the dataset
+	var schema map[string]interface{}
+	var useDefaultSchema bool = true
+
+	// Extract and validate version if present
+	if versionInterface, exists := dataset["version"]; exists {
+		if version, ok := versionInterface.(string); ok {
+			if version != "v1" {
+				log.Fatalf("\n[!] Unsupported dataset version: %s (supported: v1)", version)
+			}
+			fmt.Printf("[+] Dataset version: %s\n", version)
+		}
+	}
+
+	if schemaInterface, exists := dataset["schema"]; exists {
+		if schemaMap, ok := schemaInterface.(map[string]interface{}); ok {
+			schema = schemaMap
+			useDefaultSchema = false
+			fmt.Printf("[+] Using dynamic schema from dataset: %v\n", schema)
+		} else {
+			log.Printf("[-] Schema field exists but is not a valid object, falling back to default schema\n")
+		}
+	} else {
+		fmt.Println("[-] No schema found in dataset, using default schema")
+	}
+
 	// Initialize the MMDB writer
 	writer, err := initializeMMDBWriter(cfg, metadata.(map[string]interface{}))
 	if err != nil {
@@ -213,12 +242,12 @@ func GenerateMMDB(cfg *CmdGenerateConfig) error {
 	}
 
 	// Iterate over the dataset and write to the MMDB
-	for _, data := range dataset["data"].([]interface{}) {
+	for _, dataset := range dataset["dataset"].([]interface{}) {
 
 		recordPosition++
 
 		// Type assertion to map[string]interface{}
-		dataMap := data.(map[string]interface{})
+		dataMap := dataset.(map[string]interface{})
 
 		// Record network
 		_, network, err := net.ParseCIDR(dataMap["network"].(string))
@@ -232,8 +261,8 @@ func GenerateMMDB(cfg *CmdGenerateConfig) error {
 			log.Fatalf("\n[!] Error parsing data for record %d (network: %s) - %v", recordPosition, network, err)
 		}
 
-		// Convert dynamic data to MMDB type map
-		dynamicMmdbData := mmdb.ConvertToMMDBTypeMap(dynamicData)
+		// Convert dynamic data to MMDB type map (using dynamic schema if available)
+		dynamicMmdbData := mmdb.ConvertToMMDBTypeMap(dynamicData, useDefaultSchema, schema)
 
 		if err := writer.Insert(network, dynamicMmdbData); err != nil {
 			log.Fatalf("\n[!] Error inserting record %d (network: %s) - %v", recordPosition, network, err)

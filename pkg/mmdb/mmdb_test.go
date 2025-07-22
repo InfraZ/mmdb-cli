@@ -57,14 +57,25 @@ func TestConvertToMMDBTypeMap(t *testing.T) {
 			},
 		},
 		{
-			name: "float64 as integer",
+			name: "float64 values",
 			data: map[string]interface{}{
 				"autonomous_system_number": float64(12345),
+				"negative_float64_int":     float64(-12345),
 				"real_float":               1.23,
 			},
 			want: mmdbtype.Map{
-				mmdbtype.String("autonomous_system_number"): mmdbtype.Int32(12345),
+				mmdbtype.String("autonomous_system_number"): mmdbtype.Float64(12345),
+				mmdbtype.String("negative_float64_int"):     mmdbtype.Float64(-12345),
 				mmdbtype.String("real_float"):               mmdbtype.Float64(1.23),
+			},
+		},
+		{
+			name: "negative integers",
+			data: map[string]interface{}{
+				"negative_int": -42,
+			},
+			want: mmdbtype.Map{
+				mmdbtype.String("negative_int"): mmdbtype.Int32(-42),
 			},
 		},
 		{
@@ -78,7 +89,7 @@ func TestConvertToMMDBTypeMap(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := ConvertToMMDBTypeMap(tt.data)
+			got := ConvertToMMDBTypeMap(tt.data, true, nil)
 			if !compareMMDBTypeMaps(got, tt.want) {
 				t.Errorf("ConvertToMMDBTypeMap() = %v, want %v", got, tt.want)
 			}
@@ -114,6 +125,10 @@ func compareMMDBTypes(a, b mmdbtype.DataType) bool {
 		}
 	case mmdbtype.Int32:
 		if b, ok := b.(mmdbtype.Int32); ok {
+			return a == b
+		}
+	case mmdbtype.Uint32:
+		if b, ok := b.(mmdbtype.Uint32); ok {
 			return a == b
 		}
 	case mmdbtype.Map:

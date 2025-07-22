@@ -30,7 +30,7 @@ func TestReadDataSet(t *testing.T) {
 	defer os.Remove(tmpFile.Name())
 
 	// Write sample JSON data to the temporary file
-	sampleData := `[{"network": "192.168.1.0/24", "data": {"country": "US"}}]`
+	sampleData := `{"dataset": [{"network": "192.168.1.0/24", "data": {"country": "US"}}]}`
 	if _, err := tmpFile.Write([]byte(sampleData)); err != nil {
 		t.Fatalf("Failed to write to temp file: %v", err)
 	}
@@ -68,7 +68,7 @@ func TestReadDataSet(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			data, err := readDataSet(tt.inputDataSet)
+			data, _, _, err := parseInputData(tt.inputDataSet)
 			if (err != nil) != tt.expectedError {
 				t.Errorf("readDataSet() error = %v, expectedError %v", err, tt.expectedError)
 			}

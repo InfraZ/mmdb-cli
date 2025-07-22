@@ -35,11 +35,11 @@ type CmdDumpConfig struct {
 /*
 Structure of the dumped JSON dataset:
 {
-	"schema": "v1",
+	"version": "v1",
 	"metadata": {
 		<METADATA>
-	}
-	"data": [
+	},
+	"dataset": [
 		{
 			"network": "<NETWORK>",
 			"record": {
@@ -85,14 +85,14 @@ func DumpMMMDB(cfg *CmdDumpConfig) error {
 
 	// Prepare output data
 	outputData := make(map[string]interface{})
-	outputData["schema"] = "v1"
+	outputData["version"] = "v1"
 	outputData["metadata"] = db.Metadata
 
 	// dump counter
 	var dumpPosition int = 0
 
 	// Init output data
-	outputData["data"] = make([]map[string]interface{}, 0)
+	outputData["dataset"] = make([]map[string]interface{}, 0)
 
 	// Get all available networks
 	availableNetworks := db.Networks()
@@ -112,7 +112,7 @@ func DumpMMMDB(cfg *CmdDumpConfig) error {
 		data["network"] = subnet.String()
 		data["record"] = record
 
-		outputData["data"] = append(outputData["data"].([]map[string]interface{}), data)
+		outputData["dataset"] = append(outputData["dataset"].([]map[string]interface{}), data)
 
 		if cfg.Verbose {
 			fmt.Printf("[-] Dumping record %d for network %s - data: %v\n", dumpPosition, subnet.String(), record)
