@@ -57,6 +57,17 @@ func TestConvertToMMDBTypeMap(t *testing.T) {
 			},
 		},
 		{
+			name: "float64 as integer",
+			data: map[string]interface{}{
+				"autonomous_system_number": float64(12345),
+				"real_float":               1.23,
+			},
+			want: mmdbtype.Map{
+				mmdbtype.String("autonomous_system_number"): mmdbtype.Int32(12345),
+				mmdbtype.String("real_float"):               mmdbtype.Float64(1.23),
+			},
+		},
+		{
 			name: "unsupported type",
 			data: map[string]interface{}{
 				"unsupported": []string{"value1", "value2"},
