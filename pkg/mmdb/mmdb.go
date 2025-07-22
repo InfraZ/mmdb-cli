@@ -114,6 +114,17 @@ func convertValueWithType(value interface{}, expectedType string, key string) mm
 			log.Printf("Expected float64 for key %s, got %T", key, value)
 			return mmdbtype.Float64(0)
 		}
+	case "uint16":
+		if i, ok := value.(int16); ok {
+			return mmdbtype.Uint16(uint16(i))
+		} else if i, ok := value.(int); ok {
+			return mmdbtype.Uint16(uint16(i))
+		} else if f, ok := value.(float64); ok {
+			return mmdbtype.Uint16(uint16(f))
+		} else {
+			log.Printf("Expected int16 for key %s, got %T", key, value)
+			return mmdbtype.Uint16(0)
+		}
 	case "int", "int32":
 		if i, ok := value.(int); ok {
 			return mmdbtype.Int32(i)
