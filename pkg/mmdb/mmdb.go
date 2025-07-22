@@ -26,13 +26,19 @@ func ConvertToMMDBTypeMap(data map[string]interface{}) mmdbtype.Map {
 	mmdbMap := mmdbtype.Map{}
 	for key, value := range data {
 		mmdbKey := mmdbtype.String(key)
+
 		switch mmdbValue := value.(type) {
 		case string:
 			mmdbMap[mmdbKey] = mmdbtype.String(mmdbValue)
 		case bool:
 			mmdbMap[mmdbKey] = mmdbtype.Bool(mmdbValue)
 		case float64:
-			mmdbMap[mmdbKey] = mmdbtype.Float64(mmdbValue)
+			// Check if the float64 is actually an integer (no fractional part)
+			if mmdbValue == float64(int32(mmdbValue)) {
+				mmdbMap[mmdbKey] = mmdbtype.Int32(int32(mmdbValue))
+			} else {
+				mmdbMap[mmdbKey] = mmdbtype.Float64(mmdbValue)
+			}
 		case int:
 			mmdbMap[mmdbKey] = mmdbtype.Int32(mmdbValue)
 		case map[string]interface{}:
