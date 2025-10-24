@@ -95,7 +95,9 @@ func DumpMMMDB(cfg *CmdDumpConfig) error {
 	outputData["dataset"] = make([]map[string]interface{}, 0)
 
 	// Get all available networks
-	availableNetworks := db.Networks()
+	availableNetworks := db.Networks(
+		maxminddb.SkipAliasedNetworks,
+	)
 
 	// Iterate over all available networks
 	for availableNetworks.Next() {

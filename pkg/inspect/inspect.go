@@ -40,7 +40,7 @@ func determineLookupNetwork(input string) (string, error) {
 		} else if strings.Contains(input, ":") {
 			lookupNetwork = input + "/128"
 		} else {
-			err := errors.New("Invalid input")
+			err := errors.New("invalid input")
 			return lookupNetwork, err
 		}
 	} else {
@@ -68,7 +68,10 @@ func mmdbLookup(reader *maxminddb.Reader, query net.IP) (any, error) {
 }
 
 func mmdbNetworksWithin(reader *maxminddb.Reader, query *net.IPNet) *maxminddb.Networks {
-	networksList := reader.NetworksWithin(query)
+	networksList := reader.NetworksWithin(
+		query,
+		maxminddb.SkipAliasedNetworks,
+	)
 	return networksList
 }
 
@@ -97,7 +100,8 @@ func InspectInMMDB(cfg CmdInspectConfig) ([]byte, error) {
 		// Check if lookupNetwork is valid CIDR
 		_, netIPNet, err := net.ParseCIDR(lookupNetwork)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("[!] Invalid input: %s", input)
+			return nil, err
 		}
 
 		// Check networks in the network list of the MMDB file
@@ -113,6 +117,9 @@ func InspectInMMDB(cfg CmdInspectConfig) ([]byte, error) {
 			}
 
 			record, err := mmdbLookup(reader, address.IP)
+			if err != nil {
+				log.Fatalf("[!] Failed to lookup record: %v", err)
+			}
 
 			// Store the result in the map
 			recordsResults = append(recordsResults, map[string]interface{}{
@@ -127,6 +134,9 @@ func InspectInMMDB(cfg CmdInspectConfig) ([]byte, error) {
 
 	// convert the result to JSON bytes
 	inspectInMmdbResultJson, err := json.Marshal(inspectInMmdbResult)
+	if err != nil {
+		log.Fatalf("[!] Failed to marshal inspectInMmdbResult: %v", err)
+	}
 
 	return inspectInMmdbResultJson, nil
 }
