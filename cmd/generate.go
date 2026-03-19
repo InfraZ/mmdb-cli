@@ -17,7 +17,7 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/InfraZ/mmdb-cli/pkg/generate"
 	"github.com/spf13/cobra"
@@ -39,7 +39,7 @@ var generateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		err := generate.GenerateMMDB(&cmdGenerateConfig)
 		if err != nil {
-			fmt.Println(err)
+			log.Fatal(err)
 		}
 	},
 }

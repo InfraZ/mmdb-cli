@@ -31,3 +31,7 @@ mmdb-cli
 # Output files
 output/
 !pkg/output
+
+# SonarQube
+.sonar/
+.scannerwork/

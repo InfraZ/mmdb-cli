@@ -19,7 +19,6 @@ package dump
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/InfraZ/mmdb-cli/internal/files"
@@ -36,56 +35,51 @@ type CmdDumpConfig struct {
 
 /*
 Structure of the dumped JSON dataset:
-{
-	"version": "v1",
-	"metadata": {
-		<METADATA>
-	},
-	"dataset": [
-		{
-			"network": "<NETWORK>",
-			"record": {
-				<RECORD>
-			}
-		}
-	]
-}
-*/
 
+	{
+		"version": "v1",
+		"metadata": {
+			<METADATA>
+		},
+		"dataset": [
+			{
+				"network": "<NETWORK>",
+				"record": {
+					<RECORD>
+				}
+			}
+		]
+	}
+*/
 func DumpMMMDB(cfg *CmdDumpConfig) error {
 
-	// Validate files
 	filesToCheck := []files.FilesListValidation{
 		{FilePath: cfg.InputDatabase, ExpectedExtension: ".mmdb", ShouldExist: true},
 		{FilePath: cfg.OutputFile, ExpectedExtension: ".json", ShouldExist: false},
 	}
 
 	if err := files.FilesValidation(filesToCheck); err != nil {
-		log.Fatal(err)
+		return err
 	}
 
-	// Open the MMDB database file
 	db, err := maxminddb.Open(cfg.InputDatabase)
 	if err != nil {
-		log.Fatalf("[!] Failed to open database: %s - %v", cfg.InputDatabase, err)
+		return fmt.Errorf("failed to open database: %s - %w", cfg.InputDatabase, err)
 	}
 	defer db.Close()
 
-	// Check output file extension
 	if len(cfg.OutputFile) < 5 || cfg.OutputFile[len(cfg.OutputFile)-5:] != ".json" {
-		return fmt.Errorf("[!] Output file must have a .json extension")
+		return fmt.Errorf("output file must have a .json extension")
 	}
 
-	// Create the output file
 	outputFile, err := os.Create(cfg.OutputFile)
 	if err != nil {
-		return fmt.Errorf("[!] Failed to create output file: %s - %v", cfg.OutputFile, err)
+		return fmt.Errorf("failed to create output file: %s - %w", cfg.OutputFile, err)
 	}
 	defer outputFile.Close()
 
 	fmt.Printf("[+] Start dumping %s to %s\n", cfg.InputDatabase, cfg.OutputFile)
 
-	// Prepare output data
 	outputData := make(map[string]interface{})
 	outputData["version"] = "v1"
 	outputData["metadata"] = db.Metadata
@@ -93,21 +87,18 @@ func DumpMMMDB(cfg *CmdDumpConfig) error {
 	var readPosition int = 0
 	var dumpPosition int = 0
 
-	// Init output data
 	outputData["dataset"] = make([]map[string]interface{}, 0)
 
 	if cfg.JSONPath != "" {
 		if err := jsonpath.ValidateExpression(cfg.JSONPath); err != nil {
-			return fmt.Errorf("[!] %w", err)
+			return fmt.Errorf("%w", err)
 		}
 	}
 
-	// Get all available networks
 	availableNetworks := db.Networks(
 		maxminddb.SkipAliasedNetworks,
 	)
 
-	// Iterate over all available networks
 	for availableNetworks.Next() {
 		readPosition++
 		data := make(map[string]interface{})
@@ -121,7 +112,7 @@ func DumpMMMDB(cfg *CmdDumpConfig) error {
 		if cfg.JSONPath != "" {
 			match, err := jsonpath.MatchesRecord(cfg.JSONPath, record)
 			if err != nil {
-				return fmt.Errorf("[!] failed to evaluate JSONPath for network %s: %w", subnet.String(), err)
+				return fmt.Errorf("failed to evaluate JSONPath for network %s: %w", subnet.String(), err)
 			}
 			if !match {
 				if !cfg.Verbose {
@@ -153,21 +144,18 @@ func DumpMMMDB(cfg *CmdDumpConfig) error {
 		fmt.Printf("\r[+] Total %d records dumped successfully\n", dumpPosition)
 	}
 
-	// Write the output data to the file
 	fmt.Printf("[+] Writing output data to %s", cfg.OutputFile)
 	encoder := json.NewEncoder(outputFile)
 	err = encoder.Encode(outputData)
 	if err != nil {
-		return fmt.Errorf("[!] Failed to write output data to file: %s - %v", cfg.OutputFile, err)
+		return fmt.Errorf("failed to write output data to file: %s - %w", cfg.OutputFile, err)
 	}
 
-	// check the output file size
 	outputFileStat, err := outputFile.Stat()
 	if err != nil {
-		return fmt.Errorf("[!] Failed to get output file stats: %s - %v", cfg.OutputFile, err)
+		return fmt.Errorf("failed to get output file stats: %s - %w", cfg.OutputFile, err)
 	}
 
-	// convert outputFileStat.Size() to MB
 	outputFileSizeMB := float64(outputFileStat.Size()) / 1024 / 1024
 	fmt.Printf("\r[+] %s file created with size: %.2f MB\n", cfg.OutputFile, outputFileSizeMB)
 
