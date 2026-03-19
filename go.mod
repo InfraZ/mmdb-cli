@@ -1,6 +1,6 @@
 module github.com/InfraZ/mmdb-cli
 
-go 1.25.0
+go 1.26.0
 
 require (
 	github.com/maxmind/mmdbwriter v1.2.0
