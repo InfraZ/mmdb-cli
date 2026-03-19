@@ -17,7 +17,7 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/InfraZ/mmdb-cli/pkg/dump"
 	"github.com/spf13/cobra"
@@ -39,7 +39,7 @@ var dumpCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		err := dump.DumpMMMDB(&cmdDumpConfig)
 		if err != nil {
-			fmt.Println(err)
+			log.Fatal(err)
 		}
 	},
 }

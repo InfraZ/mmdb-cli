@@ -18,7 +18,7 @@ package metadata
 
 import (
 	"encoding/json"
-	"log"
+	"fmt"
 
 	"github.com/oschwald/maxminddb-golang"
 )
@@ -43,7 +43,7 @@ func MetadataMMDB(cfg CmdMetadataConfig) ([]byte, error) {
 
 	db, err := maxminddb.Open(cfg.InputFile)
 	if err != nil {
-		log.Fatalf("[!] Failed to open database: %s - %v", cfg.InputFile, err)
+		return nil, fmt.Errorf("failed to open database: %s - %w", cfg.InputFile, err)
 	}
 	defer db.Close()
 
@@ -63,10 +63,8 @@ func MetadataMMDB(cfg CmdMetadataConfig) ([]byte, error) {
 
 	jsonDatabaseMetadata, err := json.Marshal(databaseMetadata)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("failed to marshal metadata: %w", err)
 	}
 
-	// fmt.Println(string(jsonDatabaseMetadata))
-
-	return jsonDatabaseMetadata, err
+	return jsonDatabaseMetadata, nil
 }
