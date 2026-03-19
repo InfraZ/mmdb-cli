@@ -86,6 +86,12 @@ func InspectInMMDB(cfg CmdInspectConfig) ([]byte, error) {
 
 	inspectInMmdbResult := []map[string]interface{}{}
 
+	if cfg.JSONPath != "" {
+		if err := jsonpath.ValidateExpression(cfg.JSONPath); err != nil {
+			log.Fatalf("[!] Invalid JSONPath expression: %v", err)
+		}
+	}
+
 	// Iterate over the inputs
 	for _, input := range cfg.Inputs {
 
@@ -136,7 +142,7 @@ func InspectInMMDB(cfg CmdInspectConfig) ([]byte, error) {
 				record, _ := entry["record"].(map[string]interface{})
 				match, err := jsonpath.MatchesRecord(cfg.JSONPath, record)
 				if err != nil {
-					log.Fatalf("[!] Invalid JSONPath expression: %v", err)
+					log.Fatalf("[!] Failed to evaluate JSONPath expression: %v", err)
 				}
 				if match {
 					filtered = append(filtered, entry)
