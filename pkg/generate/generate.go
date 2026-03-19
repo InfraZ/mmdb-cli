@@ -20,7 +20,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"os"
 
@@ -40,30 +39,30 @@ type CmdGenerateConfig struct {
 
 /*
 Structure of the dumped JSON dataset:
-{
-	"version": "v1",
-	"schema": {
-		<SCHEMA>
-	},
-	"metadata": {
-		<METADATA>
-	},
-	"dataset": [
-		{
-			"network": "<NETWORK>",
-			"record": {
-				<RECORD>
+
+	{
+		"version": "v1",
+		"schema": {
+			<SCHEMA>
+		},
+		"metadata": {
+			<METADATA>
+		},
+		"dataset": [
+			{
+				"network": "<NETWORK>",
+				"record": {
+					<RECORD>
+				}
 			}
-		}
-	]
-}
+		]
+	}
 */
 
 func readDataSet(inputDataSet string) (map[string]interface{}, error) {
 	_, err := os.Stat(inputDataSet)
 	if os.IsNotExist(err) {
-		log.Fatalf("File %s does not exist", inputDataSet)
-		return nil, err
+		return nil, fmt.Errorf("file %s does not exist", inputDataSet)
 	}
 
 	datasetFile, err := os.Open(inputDataSet)
@@ -87,55 +86,40 @@ func readDataSet(inputDataSet string) (map[string]interface{}, error) {
 
 func mmdbWriterOptions(cfg *CmdGenerateConfig, metadata map[string]interface{}) (*mmdbwriter.Options, error) {
 
-	// BuildEpoch
 	if metadata["BuildEpoch"] != nil {
 		fmt.Println("[-] BuildEpoch in metadata will be ignored")
 	}
 
-	// DatabaseType
 	var databaseType string
 	if metadata["DatabaseType"] == nil {
-		log.Fatalf("\n[!] DatabaseType is a required field in metadata")
-	} else {
-		databaseType = metadata["DatabaseType"].(string)
+		return nil, fmt.Errorf("DatabaseType is a required field in metadata")
 	}
+	databaseType = metadata["DatabaseType"].(string)
 
-	// Description
 	description := make(map[string]string)
 	if metadata["Description"] == nil {
-		log.Fatalf("\n[!] Description is a required field in metadata")
-	} else {
-		// Convert the description map[string]interface {} to map[string]string
-		for descriptionKey, descriptionValue := range metadata["Description"].(map[string]interface{}) {
-			description[descriptionKey] = descriptionValue.(string)
-		}
+		return nil, fmt.Errorf("Description is a required field in metadata")
+	}
+	for descriptionKey, descriptionValue := range metadata["Description"].(map[string]interface{}) {
+		description[descriptionKey] = descriptionValue.(string)
 	}
 
-	// IPVersion
 	var ipVersion int
 	if metadata["IPVersion"] == nil {
-		// Default to IPv6
 		metadata["IPVersion"] = 6
-
 		fmt.Println("[-] IPVersion is not provided in metadata, defaulting to 6 (An IPv6 database supports both IPv4 and IPv6 lookups)")
 	} else {
-		// Convert the IPVersion to int
 		ipVersion = int(metadata["IPVersion"].(float64))
-
 		if ipVersion != 4 && ipVersion != 6 {
-			log.Fatalf("\n[!] Invalid value for IPVersion in metadata. The supported values are 4 and 6")
+			return nil, fmt.Errorf("invalid value for IPVersion in metadata, supported values are 4 and 6")
 		}
 	}
 
-	// Languages
 	languages := make([]string, 0)
 	if metadata["Languages"] == nil {
-		// Default to English
 		languages = append(languages, "en")
-
 		fmt.Println("[-] Languages is not provided in metadata, defaulting to English")
 	} else {
-		// Convert the languages []interface {} to []string
 		for _, language := range metadata["Languages"].([]interface{}) {
 			languages = append(languages, language.(string))
 		}
@@ -143,20 +127,15 @@ func mmdbWriterOptions(cfg *CmdGenerateConfig, metadata map[string]interface{}) 
 
 	var recordSize int
 	if metadata["RecordSize"] == nil {
-		// Default to 28
 		recordSize = 28
-
 		fmt.Println("[-] RecordSize is not provided in metadata, defaulting to 28 (The supported values are 24, 28, and 32)")
 	} else {
-		// Convert the RecordSize to int
 		recordSize = int(metadata["RecordSize"].(float64))
-
 		if recordSize != 24 && recordSize != 28 && recordSize != 32 {
-			log.Fatalf("\n[!] Invalid value for RecordSize in metadata. The supported values are 24, 28, and 32")
+			return nil, fmt.Errorf("invalid value for RecordSize in metadata, supported values are 24, 28, and 32")
 		}
 	}
 
-	// Initialize the MMDB writer options
 	mmdbWriterOptions := &mmdbwriter.Options{
 		DatabaseType:            databaseType,
 		Description:             description,
@@ -172,52 +151,46 @@ func mmdbWriterOptions(cfg *CmdGenerateConfig, metadata map[string]interface{}) 
 
 func initializeMMDBWriter(cfg *CmdGenerateConfig, metadata map[string]interface{}) (*mmdbwriter.Tree, error) {
 
-	mmdbWriterOptions, err := mmdbWriterOptions(cfg, metadata)
+	mmdbWriterOpts, err := mmdbWriterOptions(cfg, metadata)
 	if err != nil {
-		log.Fatalf("\n[!] Error initializing MMDB writer options: %v", err)
+		return nil, fmt.Errorf("error initializing MMDB writer options: %w", err)
 	}
 
-	writer, err := mmdbwriter.New(*mmdbWriterOptions)
+	writer, err := mmdbwriter.New(*mmdbWriterOpts)
 	if err != nil {
-		log.Fatalf("\n[!] Error initializing MMDB writer: %v", err)
+		return nil, fmt.Errorf("error initializing MMDB writer: %w", err)
 	}
 
-	return writer, err
+	return writer, nil
 }
 
 func GenerateMMDB(cfg *CmdGenerateConfig) error {
 
-	// Validate files
 	filesToCheck := []files.FilesListValidation{
 		{FilePath: cfg.InputDataset, ExpectedExtension: ".json", ShouldExist: true},
 	}
 
 	if err := files.FilesValidation(filesToCheck); err != nil {
-		log.Fatal(err)
+		return err
 	}
 
-	// Initialize the record position
 	var recordPosition int = 0
 
-	// Read the dataset
 	var dataset map[string]interface{}
 	dataset, err := readDataSet(cfg.InputDataset)
 	if err != nil {
-		log.Fatalf("\n[!] Error reading dataset: %v", err)
+		return fmt.Errorf("error reading dataset: %w", err)
 	}
 
-	// Extract metadata from the dataset
 	metadata := dataset["metadata"]
 
-	// Extract schema from the dataset
 	var schema map[string]interface{}
 	var useDefaultSchema bool = true
 
-	// Extract and validate version if present
 	if versionInterface, exists := dataset["version"]; exists {
 		if version, ok := versionInterface.(string); ok {
 			if version != "v1" {
-				log.Fatalf("\n[!] Unsupported dataset version: %s (supported: v1)", version)
+				return fmt.Errorf("unsupported dataset version: %s (supported: v1)", version)
 			}
 			fmt.Printf("[+] Dataset version: %s\n", version)
 		}
@@ -229,43 +202,37 @@ func GenerateMMDB(cfg *CmdGenerateConfig) error {
 			useDefaultSchema = false
 			fmt.Printf("[+] Using dynamic schema from dataset: %v\n", schema)
 		} else {
-			log.Printf("[-] Schema field exists but is not a valid object, falling back to default schema\n")
+			fmt.Println("[-] Schema field exists but is not a valid object, falling back to default schema")
 		}
 	} else {
 		fmt.Println("[-] No schema found in dataset, using default schema")
 	}
 
-	// Initialize the MMDB writer
 	writer, err := initializeMMDBWriter(cfg, metadata.(map[string]interface{}))
 	if err != nil {
-		log.Fatalf("\n[!] Error initializing MMDB writer: %v", err)
+		return fmt.Errorf("error initializing MMDB writer: %w", err)
 	}
 
-	// Iterate over the dataset and write to the MMDB
 	for _, dataset := range dataset["dataset"].([]interface{}) {
 
 		recordPosition++
 
-		// Type assertion to map[string]interface{}
 		dataMap := dataset.(map[string]interface{})
 
-		// Record network
 		_, network, err := net.ParseCIDR(dataMap["network"].(string))
 		if err != nil {
-			log.Fatalf("\n[!] Invalid network (%s) in the dataset: %v", dataMap["network"].(string), err)
+			return fmt.Errorf("invalid network (%s) in the dataset: %w", dataMap["network"].(string), err)
 		}
 
-		// Parse dynamic data
 		dynamicData, exists := dataMap["record"].(map[string]interface{})
 		if !exists {
-			log.Fatalf("\n[!] Error parsing data for record %d (network: %s) - %v", recordPosition, network, err)
+			return fmt.Errorf("error parsing data for record %d (network: %s)", recordPosition, network)
 		}
 
-		// Convert dynamic data to MMDB type map (using dynamic schema if available)
 		dynamicMmdbData := mmdb.ConvertToMMDBTypeMap(dynamicData, useDefaultSchema, schema)
 
 		if err := writer.Insert(network, dynamicMmdbData); err != nil {
-			log.Fatalf("\n[!] Error inserting record %d (network: %s) - %v", recordPosition, network, err)
+			return fmt.Errorf("error inserting record %d (network: %s) - %w", recordPosition, network, err)
 		}
 
 		if cfg.Verbose {
@@ -277,26 +244,22 @@ func GenerateMMDB(cfg *CmdGenerateConfig) error {
 
 	fmt.Printf("\r[+] Total records inserted: %d\n", recordPosition)
 
-	// Write the MMDB database to the output file
 	outputFile, err := os.Create(cfg.OutputDatabase)
 	if err != nil {
 		return err
 	}
 	defer outputFile.Close()
 
-	// Write the MMDB database to the output file
 	fmt.Println("[+] Writing MMDB database to the output file")
 	if _, err = writer.WriteTo(outputFile); err != nil {
 		return err
 	}
 
-	// check the output file size
 	outputDatabaseStat, err := outputFile.Stat()
 	if err != nil {
-		return fmt.Errorf("[!] Failed to get output file stats: %s - %v", cfg.OutputDatabase, err)
+		return fmt.Errorf("failed to get output file stats: %s - %w", cfg.OutputDatabase, err)
 	}
 
-	// convert outputDatabaseStat.Size() to MB
 	outputDatabaseSizeMB := float64(outputDatabaseStat.Size()) / 1024 / 1024
 	fmt.Printf("\r[+] %s file created with size: %.2f MB\n", cfg.OutputDatabase, outputDatabaseSizeMB)
 

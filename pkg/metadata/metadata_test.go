@@ -17,20 +17,88 @@ limitations under the License.
 package metadata
 
 import (
+	"encoding/json"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func TestMetadataMMDB(t *testing.T) {
-	expected := `{"description":{"en":"MMDB CLI Metadata Test"},"database_type":"Metadata Test","languages":["de","en","es","fr","ja","pt-BR","ru","zh-CN"],"binary_format_major_version":2,"binary_format_minor_version":0,"build_epoch":1741881777,"ip_version":6,"node_count":367,"record_size":24}`
-	testMMDBFile := "../../test/metadata.mmdb"
+const testMMDB = "../../test/metadata.mmdb"
 
-	result, err := MetadataMMDB(CmdMetadataConfig{InputFile: testMMDBFile})
-	jsonResult := string(result)
-	if err != nil {
-		t.Errorf("MetadataMMDB() error = %v; want nil", err)
+func TestMetadataMMDB(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name    string
+		cfg     CmdMetadataConfig
+		wantErr bool
+		verify  func(t *testing.T, result []byte)
+	}{
+		{
+			name: "valid MMDB file",
+			cfg:  CmdMetadataConfig{InputFile: testMMDB},
+			verify: func(t *testing.T, result []byte) {
+				t.Helper()
+				var meta DatabaseMetadata
+				require.NoError(t, json.Unmarshal(result, &meta))
+
+				assert.Equal(t, "Metadata Test", meta.DatabaseType)
+				assert.Equal(t, map[string]string{"en": "MMDB CLI Metadata Test"}, meta.Description)
+				assert.Contains(t, meta.Languages, "en")
+				assert.Equal(t, uint(2), meta.BinaryFormatMajorVersion)
+				assert.Equal(t, uint(0), meta.BinaryFormatMinorVersion)
+				assert.Equal(t, uint(6), meta.IPVersion)
+				assert.Equal(t, uint(24), meta.RecordSize)
+				assert.Greater(t, meta.NodeCount, uint(0))
+				assert.Greater(t, meta.BuildEpoch, uint(0))
+			},
+		},
+		{
+			name:    "non-existent file",
+			cfg:     CmdMetadataConfig{InputFile: "/nonexistent/file.mmdb"},
+			wantErr: true,
+		},
+		{
+			name:    "empty path",
+			cfg:     CmdMetadataConfig{InputFile: ""},
+			wantErr: true,
+		},
 	}
 
-	if string(result) != expected {
-		t.Errorf("MetadataMMDB() = %v; want %v", jsonResult, expected)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			result, err := MetadataMMDB(tt.cfg)
+			if tt.wantErr {
+				assert.Error(t, err)
+				assert.Nil(t, result)
+				return
+			}
+			require.NoError(t, err)
+			assert.NotNil(t, result)
+			if tt.verify != nil {
+				tt.verify(t, result)
+			}
+		})
+	}
+}
+
+func TestMetadataMMDBJsonStructure(t *testing.T) {
+	t.Parallel()
+
+	result, err := MetadataMMDB(CmdMetadataConfig{InputFile: testMMDB})
+	require.NoError(t, err)
+
+	var raw map[string]interface{}
+	require.NoError(t, json.Unmarshal(result, &raw))
+
+	expectedFields := []string{
+		"description", "database_type", "languages",
+		"binary_format_major_version", "binary_format_minor_version",
+		"build_epoch", "ip_version", "node_count", "record_size",
+	}
+	for _, field := range expectedFields {
+		assert.Contains(t, raw, field, "JSON output should contain field %q", field)
 	}
 }

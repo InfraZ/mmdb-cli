@@ -20,7 +20,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"os"
 
@@ -44,8 +43,7 @@ type CmdUpdateConfig struct {
 func readJsonInput(inputDataSet string) (map[string]interface{}, error) {
 	_, err := os.Stat(inputDataSet)
 	if os.IsNotExist(err) {
-		log.Fatalf("File %s does not exist", inputDataSet)
-		return nil, err
+		return nil, fmt.Errorf("file %s does not exist", inputDataSet)
 	}
 
 	datasetFile, err := os.Open(inputDataSet)
@@ -73,7 +71,6 @@ func parseInputData(inputDataSet string) ([]map[string]interface{}, map[string]i
 		return nil, nil, "", fmt.Errorf("error reading dataset: %w", err)
 	}
 
-	// Handle the dataset field
 	datasetInterface, exists := inputData["dataset"]
 	if !exists {
 		return nil, nil, "", fmt.Errorf("no 'dataset' field found in input data")
@@ -84,7 +81,6 @@ func parseInputData(inputDataSet string) ([]map[string]interface{}, map[string]i
 		return nil, nil, "", fmt.Errorf("dataset field is not an array")
 	}
 
-	// Convert []interface{} to []map[string]interface{}
 	inputDataDataset := make([]map[string]interface{}, len(datasetSlice))
 	for i, item := range datasetSlice {
 		itemMap, ok := item.(map[string]interface{})
@@ -94,7 +90,6 @@ func parseInputData(inputDataSet string) ([]map[string]interface{}, map[string]i
 		inputDataDataset[i] = itemMap
 	}
 
-	// Handle the schema field
 	var inputDataSchema map[string]interface{}
 	if schemaInterface, exists := inputData["schema"]; exists {
 		if schema, ok := schemaInterface.(map[string]interface{}); ok {
@@ -102,7 +97,6 @@ func parseInputData(inputDataSet string) ([]map[string]interface{}, map[string]i
 		}
 	}
 
-	// Handle the version field
 	var inputDataVersion string
 	if versionInterface, exists := inputData["version"]; exists {
 		if version, ok := versionInterface.(string); ok {
@@ -115,7 +109,6 @@ func parseInputData(inputDataSet string) ([]map[string]interface{}, map[string]i
 
 func UpdateMMDB(cfg CmdUpdateConfig) error {
 
-	// Validate files
 	filesToCheck := []files.FilesListValidation{
 		{FilePath: cfg.InputDataSet, ExpectedExtension: ".json", ShouldExist: true},
 		{FilePath: cfg.InputDatabase, ExpectedExtension: ".mmdb", ShouldExist: true},
@@ -123,23 +116,21 @@ func UpdateMMDB(cfg CmdUpdateConfig) error {
 	}
 
 	if err := files.FilesValidation(filesToCheck); err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	inputDataDataset, inputDataSchema, inputDataVersion, err := parseInputData(cfg.InputDataSet)
 	if err != nil {
-		log.Fatalf("Error parsing input data: %v", err)
+		return fmt.Errorf("error parsing input data: %w", err)
 	}
 
-	// Validate and log version information if present
 	if inputDataVersion != "" {
 		if inputDataVersion != "v1" {
-			log.Fatalf("[!] Unsupported version: %s (supported: v1)", inputDataVersion)
+			return fmt.Errorf("unsupported version: %s (supported: v1)", inputDataVersion)
 		}
 		fmt.Printf("[+] Dataset version: %s\n", inputDataVersion)
 	}
 
-	// Handle schema information
 	var useDefaultSchema bool = true
 	if inputDataSchema != nil {
 		fmt.Printf("[+] Dataset schema: %v\n", inputDataSchema)
@@ -148,79 +139,68 @@ func UpdateMMDB(cfg CmdUpdateConfig) error {
 		fmt.Println("[-] No schema found in input data, using default schema")
 	}
 
-	var (
-		// updatedCount   int = len(dataset)
-		updatePosition int
-	)
+	var updatePosition int
 
 	writer, err := mmdbwriter.Load(cfg.InputDatabase, mmdbwriter.Options{
 		DisableIPv4Aliasing:     cfg.DisableIPv4Aliasing,
 		IncludeReservedNetworks: cfg.IncludeReservedNetworks,
 	})
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("failed to load MMDB database: %w", err)
 	}
 
 	fmt.Println("[+] Starting update mmdb with dataset")
 
-	// Iterate over the dataset
 	for _, updateRequest := range inputDataDataset {
 		updatePosition++
 
-		// Check if network is present
 		_, networkExists := updateRequest["network"]
 		if !networkExists {
-			log.Fatalf("[!] No 'network' found for record %d", updatePosition)
+			return fmt.Errorf("no 'network' found for record %d", updatePosition)
 		}
 
 		_, network, err := net.ParseCIDR(updateRequest["network"].(string))
 		if err != nil {
-			log.Fatalf("[!] Error parsing network for record %d (%s) - %v", updatePosition, updateRequest["network"], err)
+			return fmt.Errorf("error parsing network for record %d (%s) - %w", updatePosition, updateRequest["network"], err)
 		}
 
-		// Check if data is present
 		_, dataExists := updateRequest["data"]
 		if !dataExists {
-			log.Fatalf("[!] No 'data' found for record %d (network: %s)", updatePosition, network)
+			return fmt.Errorf("no 'data' found for record %d (network: %s)", updatePosition, network)
 		}
 
-		// Parse dynamic data
 		dynamicData, exists := updateRequest["data"].(map[string]interface{})
 		if !exists {
-			log.Fatalf("[!] Error parsing data for record %d (network: %s) - %v", updatePosition, network, err)
+			return fmt.Errorf("error parsing data for record %d (network: %s)", updatePosition, network)
 		}
 
 		dynamicMmdbData := mmdb.ConvertToMMDBTypeMap(dynamicData, useDefaultSchema, inputDataSchema)
 
-		// Switch to select the type of update
 		method, isMethodPresent := updateRequest["method"].(string)
 		if !isMethodPresent {
-			log.Printf("[!] No 'method' found for record %d, defaulting to 'deep_merge'", updatePosition)
+			fmt.Printf("[!] No 'method' found for record %d, defaulting to 'deep_merge'\n", updatePosition)
 			method = "deep_merge"
 		}
 
 		switch method {
 		case "remove":
 			if err := writer.InsertFunc(network, inserter.Remove); err != nil {
-				log.Fatalf("[!] Error removing data for record %d (network: %s) - %v", updatePosition, network, err)
+				return fmt.Errorf("error removing data for record %d (network: %s) - %w", updatePosition, network, err)
 			}
 		case "replace":
-			// Replace existing data with dynamic data
 			if err := writer.InsertFunc(network, inserter.ReplaceWith(dynamicMmdbData)); err != nil {
-				log.Fatalf("[!] Error replacing data for record %d (network: %s) - %v", updatePosition, network, err)
+				return fmt.Errorf("error replacing data for record %d (network: %s) - %w", updatePosition, network, err)
 			}
 		case "top_level_merge":
-			// Merge top-level keys and values from new data
 			if err := writer.InsertFunc(network, inserter.TopLevelMergeWith(dynamicMmdbData)); err != nil {
-				log.Fatalf("[!] Error top level merging data for record %d (network: %s) - %v", updatePosition, network, err)
+				return fmt.Errorf("error top level merging data for record %d (network: %s) - %w", updatePosition, network, err)
 			}
 		case "deep_merge":
-			// Deep merge dynamic data with existing data
 			if err := writer.InsertFunc(network, inserter.DeepMergeWith(dynamicMmdbData)); err != nil {
-				log.Fatalf("[!] Error deep merging data for record %d (network: %s) - %v", updatePosition, network, err)
+				return fmt.Errorf("error deep merging data for record %d (network: %s) - %w", updatePosition, network, err)
 			}
 		default:
-			log.Fatalf("[!] Unsupported method '%s' for record %d (supported: remove, replace, top_level_merge, deep_merge)", method, updatePosition)
+			return fmt.Errorf("unsupported method '%s' for record %d (supported: remove, replace, top_level_merge, deep_merge)", method, updatePosition)
 		}
 
 		if cfg.Verbose {
@@ -232,7 +212,6 @@ func UpdateMMDB(cfg CmdUpdateConfig) error {
 
 	fmt.Printf("\r[+] %d Dataset records processed\n", updatePosition)
 
-	// Write the updated MMDB to a file
 	fmt.Printf("[+] Writing updated MMDB to file")
 	outputFile, err := os.Create(cfg.OutputDatabase)
 	if err != nil {
