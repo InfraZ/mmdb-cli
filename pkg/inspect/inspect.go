@@ -23,12 +23,14 @@ import (
 	"net"
 	"strings"
 
+	"github.com/InfraZ/mmdb-cli/pkg/jsonpath"
 	"github.com/oschwald/maxminddb-golang"
 )
 
 type CmdInspectConfig struct {
 	InputFile string
 	Inputs    []string
+	JSONPath  string
 }
 
 func determineLookupNetwork(input string) (string, error) {
@@ -84,6 +86,12 @@ func InspectInMMDB(cfg CmdInspectConfig) ([]byte, error) {
 
 	inspectInMmdbResult := []map[string]interface{}{}
 
+	if cfg.JSONPath != "" {
+		if err := jsonpath.ValidateExpression(cfg.JSONPath); err != nil {
+			log.Fatalf("[!] Invalid JSONPath expression: %v", err)
+		}
+	}
+
 	// Iterate over the inputs
 	for _, input := range cfg.Inputs {
 
@@ -126,6 +134,21 @@ func InspectInMMDB(cfg CmdInspectConfig) ([]byte, error) {
 				"network": address.String(),
 				"record":  record,
 			})
+		}
+
+		if cfg.JSONPath != "" {
+			filtered := []map[string]interface{}{}
+			for _, entry := range recordsResults {
+				record, _ := entry["record"].(map[string]interface{})
+				match, err := jsonpath.MatchesRecord(cfg.JSONPath, record)
+				if err != nil {
+					log.Fatalf("[!] Failed to evaluate JSONPath expression: %v", err)
+				}
+				if match {
+					filtered = append(filtered, entry)
+				}
+			}
+			recordsResults = filtered
 		}
 
 		inspectInMmdbResult[len(inspectInMmdbResult)-1]["records"] = recordsResults

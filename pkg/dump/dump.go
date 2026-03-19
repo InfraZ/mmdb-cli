@@ -23,6 +23,7 @@ import (
 	"os"
 
 	"github.com/InfraZ/mmdb-cli/internal/files"
+	"github.com/InfraZ/mmdb-cli/pkg/jsonpath"
 	"github.com/oschwald/maxminddb-golang"
 )
 
@@ -30,6 +31,7 @@ type CmdDumpConfig struct {
 	InputDatabase string
 	OutputFile    string
 	Verbose       bool
+	JSONPath      string
 }
 
 /*
@@ -88,11 +90,17 @@ func DumpMMMDB(cfg *CmdDumpConfig) error {
 	outputData["version"] = "v1"
 	outputData["metadata"] = db.Metadata
 
-	// dump counter
+	var readPosition int = 0
 	var dumpPosition int = 0
 
 	// Init output data
 	outputData["dataset"] = make([]map[string]interface{}, 0)
+
+	if cfg.JSONPath != "" {
+		if err := jsonpath.ValidateExpression(cfg.JSONPath); err != nil {
+			return fmt.Errorf("[!] %w", err)
+		}
+	}
 
 	// Get all available networks
 	availableNetworks := db.Networks(
@@ -101,8 +109,7 @@ func DumpMMMDB(cfg *CmdDumpConfig) error {
 
 	// Iterate over all available networks
 	for availableNetworks.Next() {
-
-		dumpPosition++
+		readPosition++
 		data := make(map[string]interface{})
 		record := make(map[string]interface{})
 
@@ -111,6 +118,20 @@ func DumpMMMDB(cfg *CmdDumpConfig) error {
 			return fmt.Errorf("failed to get record for next subnet: %w", err)
 		}
 
+		if cfg.JSONPath != "" {
+			match, err := jsonpath.MatchesRecord(cfg.JSONPath, record)
+			if err != nil {
+				return fmt.Errorf("[!] failed to evaluate JSONPath for network %s: %w", subnet.String(), err)
+			}
+			if !match {
+				if !cfg.Verbose {
+					fmt.Printf("\r[-] Read records: %d, Matched records: %d", readPosition, dumpPosition)
+				}
+				continue
+			}
+		}
+
+		dumpPosition++
 		data["network"] = subnet.String()
 		data["record"] = record
 
@@ -118,13 +139,19 @@ func DumpMMMDB(cfg *CmdDumpConfig) error {
 
 		if cfg.Verbose {
 			fmt.Printf("[-] Dumping record %d for network %s - data: %v\n", dumpPosition, subnet.String(), record)
+		} else if cfg.JSONPath != "" {
+			fmt.Printf("\r[-] Read records: %d, Matched records: %d", readPosition, dumpPosition)
 		} else {
 			fmt.Printf("\r[-] Dumped records: %d", dumpPosition)
 		}
 
 	}
 
-	fmt.Printf("\r[+] Total %d records dumped successfully\n", dumpPosition)
+	if cfg.JSONPath != "" {
+		fmt.Printf("\r[+] Read %d records, matched %d records\n", readPosition, dumpPosition)
+	} else {
+		fmt.Printf("\r[+] Total %d records dumped successfully\n", dumpPosition)
+	}
 
 	// Write the output data to the file
 	fmt.Printf("[+] Writing output data to %s", cfg.OutputFile)
