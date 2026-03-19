@@ -23,6 +23,7 @@ import (
 	"os"
 
 	"github.com/InfraZ/mmdb-cli/internal/files"
+	"github.com/InfraZ/mmdb-cli/pkg/jsonpath"
 	"github.com/oschwald/maxminddb-golang"
 )
 
@@ -30,6 +31,7 @@ type CmdDumpConfig struct {
 	InputDatabase string
 	OutputFile    string
 	Verbose       bool
+	JSONPath      string
 }
 
 /*

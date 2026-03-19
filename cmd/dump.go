@@ -49,6 +49,7 @@ func init() {
 	dumpCmd.Flags().StringVarP(&cmdDumpConfig.InputDatabase, "input", "i", "", "Input path of the MMDB file")
 	dumpCmd.Flags().StringVarP(&cmdDumpConfig.OutputFile, "output", "o", "", "Output path of the output JSON dataset file (must have a .json extension)")
 	dumpCmd.Flags().BoolVarP(&cmdDumpConfig.Verbose, "verbose", "v", false, "Enable verbose mode")
+	dumpCmd.Flags().StringVarP(&cmdDumpConfig.JSONPath, "jsonpath", "j", "", `JSONPath filter applied to each record (e.g. '{[?(@.country.iso_code=="US")]}')`)
 
 	// Mark required flags
 	dumpCmd.MarkFlagRequired("input")

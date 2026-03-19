@@ -23,12 +23,14 @@ import (
 	"net"
 	"strings"
 
+	"github.com/InfraZ/mmdb-cli/pkg/jsonpath"
 	"github.com/oschwald/maxminddb-golang"
 )
 
 type CmdInspectConfig struct {
 	InputFile string
 	Inputs    []string
+	JSONPath  string
 }
 
 func determineLookupNetwork(input string) (string, error) {
