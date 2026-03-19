@@ -28,6 +28,7 @@ nfpms:
       - deb
       - rpm
       - apk
+      - archlinux
     deb:
       signature:
         key_file: "{{ .Env.GPG_PRIVATE_KEY_PATH }}"
@@ -38,6 +39,8 @@ nfpms:
       packager: InfraZ Packages <packages@infraz.io>
       signature:
         key_file: "{{ .Env.GPG_PRIVATE_KEY_PATH }}"
+    archlinux:
+      packager: InfraZ Packages <packages@infraz.io>
 
 signs:
   - artifacts: all
