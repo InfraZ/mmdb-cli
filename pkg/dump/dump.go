@@ -80,20 +80,24 @@ func DumpMMMDB(cfg *CmdDumpConfig) error {
 
 	fmt.Printf("[+] Start dumping %s to %s\n", cfg.InputDatabase, cfg.OutputFile)
 
-	outputData := make(map[string]interface{})
-	outputData["version"] = "v1"
-	outputData["metadata"] = db.Metadata
-
-	var readPosition int = 0
-	var dumpPosition int = 0
-
-	outputData["dataset"] = make([]map[string]interface{}, 0)
-
 	if cfg.JSONPath != "" {
 		if err := jsonpath.ValidateExpression(cfg.JSONPath); err != nil {
 			return fmt.Errorf("%w", err)
 		}
 	}
+
+	metadataJSON, err := json.Marshal(db.Metadata)
+	if err != nil {
+		return fmt.Errorf("failed to marshal metadata: %w", err)
+	}
+	if _, err := fmt.Fprintf(outputFile, `{"version":"v1","metadata":%s,"dataset":[`, metadataJSON); err != nil {
+		return fmt.Errorf("failed to write output header: %w", err)
+	}
+
+	encoder := json.NewEncoder(outputFile)
+	var readPosition int
+	var dumpPosition int
+	firstRecord := true
 
 	availableNetworks := db.Networks(
 		maxminddb.SkipAliasedNetworks,
@@ -101,7 +105,6 @@ func DumpMMMDB(cfg *CmdDumpConfig) error {
 
 	for availableNetworks.Next() {
 		readPosition++
-		data := make(map[string]interface{})
 		record := make(map[string]interface{})
 
 		subnet, err := availableNetworks.Network(&record)
@@ -123,10 +126,21 @@ func DumpMMMDB(cfg *CmdDumpConfig) error {
 		}
 
 		dumpPosition++
-		data["network"] = subnet.String()
-		data["record"] = record
 
-		outputData["dataset"] = append(outputData["dataset"].([]map[string]interface{}), data)
+		if !firstRecord {
+			if _, err := outputFile.WriteString(","); err != nil {
+				return fmt.Errorf("failed to write record separator: %w", err)
+			}
+		}
+		firstRecord = false
+
+		data := map[string]interface{}{
+			"network": subnet.String(),
+			"record":  record,
+		}
+		if err := encoder.Encode(data); err != nil {
+			return fmt.Errorf("failed to encode record for network %s: %w", subnet.String(), err)
+		}
 
 		if cfg.Verbose {
 			fmt.Printf("[-] Dumping record %d for network %s - data: %v\n", dumpPosition, subnet.String(), record)
@@ -135,7 +149,10 @@ func DumpMMMDB(cfg *CmdDumpConfig) error {
 		} else {
 			fmt.Printf("\r[-] Dumped records: %d", dumpPosition)
 		}
+	}
 
+	if _, err := outputFile.WriteString("]}"); err != nil {
+		return fmt.Errorf("failed to write output footer: %w", err)
 	}
 
 	if cfg.JSONPath != "" {
@@ -144,20 +161,13 @@ func DumpMMMDB(cfg *CmdDumpConfig) error {
 		fmt.Printf("\r[+] Total %d records dumped successfully\n", dumpPosition)
 	}
 
-	fmt.Printf("[+] Writing output data to %s", cfg.OutputFile)
-	encoder := json.NewEncoder(outputFile)
-	err = encoder.Encode(outputData)
-	if err != nil {
-		return fmt.Errorf("failed to write output data to file: %s - %w", cfg.OutputFile, err)
-	}
-
 	outputFileStat, err := outputFile.Stat()
 	if err != nil {
 		return fmt.Errorf("failed to get output file stats: %s - %w", cfg.OutputFile, err)
 	}
 
 	outputFileSizeMB := float64(outputFileStat.Size()) / 1024 / 1024
-	fmt.Printf("\r[+] %s file created with size: %.2f MB\n", cfg.OutputFile, outputFileSizeMB)
+	fmt.Printf("[+] %s file created with size: %.2f MB\n", cfg.OutputFile, outputFileSizeMB)
 
 	fmt.Println("[+] MMDB Dumped successfully")
 
