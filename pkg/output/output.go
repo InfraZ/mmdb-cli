@@ -39,6 +39,8 @@ func Output(byteData []byte, options OutputOptions) error {
 		return JsonOutput(byteData, options)
 	case "yaml":
 		return YamlOutput(byteData, options)
+	case "xml":
+		return XmlOutput(byteData, options)
 	default:
 		return fmt.Errorf("Unsupported output format: %s", options.Format)
 	}

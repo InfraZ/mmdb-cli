@@ -54,7 +54,7 @@ var metadataCmd = &cobra.Command{
 func init() {
 	// Add flags to the metadata command
 	metadataCmd.Flags().StringVarP(&cmdMetadataConfig.InputFile, "input", "i", "", "Input path of the MMDB file")
-	metadataCmd.Flags().StringVarP(&outputOptions.Format, "format", "f", "yaml", "Output format (yaml, json, json-pretty)")
+	metadataCmd.Flags().StringVarP(&outputOptions.Format, "format", "f", "yaml", "Output format (yaml, json, json-pretty, xml)")
 
 	// Mark required flags
 	metadataCmd.MarkFlagRequired("input")
