@@ -57,7 +57,7 @@ var inspectCmd = &cobra.Command{
 func init() {
 	// Add flags to the inspect command
 	inspectCmd.Flags().StringVarP(&cmdInspectConfig.InputFile, "input", "i", "", "Input path of the MMDB file")
-	inspectCmd.Flags().StringVarP(&outputOptions.Format, "format", "f", "yaml", "Output format (yaml, json, json-pretty)")
+	inspectCmd.Flags().StringVarP(&outputOptions.Format, "format", "f", "yaml", "Output format (yaml, json, json-pretty, xml)")
 	inspectCmd.Flags().StringVarP(&cmdInspectConfig.JSONPath, "jsonpath", "j", "", `JSONPath filter applied to each record (e.g. '{[?(@.country.iso_code=="US")]}')`)
 
 	inspectCmd.Args = cobra.MinimumNArgs(1)

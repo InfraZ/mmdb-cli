@@ -73,9 +73,14 @@ func TestOutput(t *testing.T) {
 			options: OutputOptions{Format: "yaml"},
 		},
 		{
+			name:    "XML format",
+			data:    []byte(`{"test":"data"}`),
+			options: OutputOptions{Format: "xml"},
+		},
+		{
 			name:        "unsupported format",
 			data:        []byte(`{"test":"data"}`),
-			options:     OutputOptions{Format: "xml"},
+			options:     OutputOptions{Format: "toml"},
 			wantErr:     true,
 			errContains: "Unsupported output format",
 		},
