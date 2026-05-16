@@ -75,12 +75,6 @@ homebrew_casks:
       name: homebrew-tap
       branch: main
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
-    generate_completions_from_executable:
-      shell_parameter_format: cobra
-      shells:
-        - bash
-        - zsh
-        - fish
 
 signs:
   - artifacts: all
