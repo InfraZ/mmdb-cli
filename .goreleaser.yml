@@ -43,14 +43,24 @@ nfpms:
     archlinux:
       packager: InfraZ Packages <packages@infraz.io>
 
-brews:
+homebrew_casks:
   - name: mmdb-cli
-    license: Apache-2.0
-    directory: Formula
+    binaries:
+      - mmdb-cli
     homepage: "https://infraz.io"
     description: |
       InfraZ MMDB-CLI is a command-line toolkit to work with MMDB files.
       It empowers you to create, transform, export, and explore MMDB files.
+    # Removes macOS quarantine bit — required since mmdb-cli is not notarized
+    hooks:
+      post:
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/mmdb-cli"]
+          end
+    caveats: |
+      mmdb-cli is not notarized by Apple. If macOS blocks the binary,
+      run: xattr -dr com.apple.quarantine $(which mmdb-cli)
     commit_author:
       name: InfraZ Packages Bot
       email: packages@infraz.io
@@ -59,12 +69,18 @@ brews:
         key: /tmp/GPG_PRIVATE_KEY.gpg
         program: gpg2
         format: openpgp
-    commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
+    commit_msg_template: "Brew cask update for {{ .ProjectName }} version {{ .Tag }}"
     repository:
       owner: InfraZ
       name: homebrew-tap
       branch: main
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    generate_completions_from_executable:
+      shell_parameter_format: cobra
+      shells:
+        - bash
+        - zsh
+        - fish
 
 signs:
   - artifacts: all
