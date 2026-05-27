@@ -1,0 +1,46 @@
+name: Sync Documentations
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/**"
+  workflow_dispatch:
+
+jobs:
+  sync:
+    if: github.repository == 'InfraZ/mmdb-cli'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout mmdb-cli
+        uses: actions/checkout@v6
+        with:
+          path: mmdb-cli
+
+      - name: Checkout InfraZ/docs
+        uses: actions/checkout@v6
+        with:
+          repository: InfraZ/docs
+          token: ${{ secrets.INFRAZ_DOCS_TOKEN }}
+          path: infraz-docs
+
+      - name: Copy docs
+        run: |
+          rm -vrf infraz-docs/docs/mmdb-cli
+          cp -vr mmdb-cli/docs/ infraz-docs/docs/mmdb-cli
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          token: ${{ secrets.INFRAZ_DOCS_TOKEN }}
+          path: infraz-docs
+          branch: sync/mmdb-cli-docs
+          commit-message: "docs(mmdb-cli): sync from InfraZ/mmdb-cli@${{ github.sha }}"
+          title: "docs(mmdb-cli): sync docs from mmdb-cli"
+          body: |
+            Automated sync of `docs/` from [InfraZ/mmdb-cli](https://github.com/InfraZ/mmdb-cli).
+
+            **Source commit:** ${{ github.sha }}
+            **Triggered by:** ${{ github.actor }}
+          delete-branch: true
