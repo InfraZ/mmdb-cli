@@ -14,7 +14,7 @@ tags:
 
 **MMDB CLI** is our first publicly available open-source project, developed to simplify working with MMDB files. It is a command-line tool that allows you to generate, modify, export, and inspect MMDB files, among other functionalities.
 
-![InfraZ MMDB CLI Cover](/img/docs/mmdb-cli/mmdb-cli-cover.png)
+<!-- ![InfraZ MMDB CLI Cover](/img/docs/mmdb-cli/mmdb-cli-cover.png) -->
 
 ## What is MMDB?
 
