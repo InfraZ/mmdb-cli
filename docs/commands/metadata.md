@@ -6,9 +6,10 @@ tags:
   - cli
   - mmdb
   - mmdb-cli
+  - geoip
 ---
 
-# Metadata Command 🪨
+# Metadata Command
 
 The `metadata` command prints MMDB metadata including database type, description, languages, IP version, node count, and record size.
 

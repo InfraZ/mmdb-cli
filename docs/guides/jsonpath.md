@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 3
 sidebar_label: JSONPath output format
 description: Use JSONPath templates with the -f flag on inspect and dump
 tags:
@@ -7,6 +7,7 @@ tags:
   - mmdb
   - mmdb-cli
   - jsonpath
+  - geoip
 ---
 
 # JSONPath output format

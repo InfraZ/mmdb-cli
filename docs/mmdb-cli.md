@@ -10,7 +10,7 @@ tags:
   - geoip
 ---
 
-# MMDB CLI 🛠️
+# MMDB CLI
 
 **MMDB CLI** is our first publicly available open-source project, developed to simplify working with MMDB files. It is a command-line tool that allows you to generate, modify, export, and inspect MMDB files, among other functionalities.
 
@@ -42,6 +42,8 @@ The CLI binary name used throughout this documentation is `mmdb-cli`.
 - [Building from Source](./mmdb-cli/building-from-source)
 - [Dataset Schema](./mmdb-cli/dataset-schema)
 - Guides:
+  - [Create a Custom MMDB from Scratch](./mmdb-cli/guides/create-custom-mmdb)
+  - [Modify a GeoIP Database](./mmdb-cli/guides/modify-geoip-database)
   - [JSONPath output format and filtering](./mmdb-cli/guides/jsonpath)
 - Commands:
   - [Metadata](./mmdb-cli/commands/metadata)

@@ -6,9 +6,10 @@ tags:
   - cli
   - mmdb
   - mmdb-cli
+  - geoip
 ---
 
-# Update Command 🧠
+# Update Command
 
 The `update` command updates existing MMDB files using dataset operations. It supports record removal, replacement, and merge strategies without recreating the database from scratch.
 
