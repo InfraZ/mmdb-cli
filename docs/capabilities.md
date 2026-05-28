@@ -10,7 +10,7 @@ tags:
   - capability
 ---
 
-# Capabilities 🔥
+# Capabilities
 
 MMDB CLI is a powerful command-line tool offering a wide range of features for working with MMDB files. Some of the key features include:
 

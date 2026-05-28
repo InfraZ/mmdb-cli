@@ -6,9 +6,10 @@ tags:
   - cli
   - mmdb
   - mmdb-cli
+  - geoip
 ---
 
-# Dump Command 🐣
+# Dump Command
 
 The `dump` command exports an entire MMDB database to a file. By default it writes the [dataset schema v1](../dataset-schema) JSON document.
 

@@ -7,9 +7,10 @@ tags:
   - mmdb
   - mmdb-cli
   - dataset
+  - geoip
 ---
 
-# Dataset Schema 🧪
+# Dataset Schema
 
 MMDB CLI uses JSON dataset files for `generate`, `update`, and `dump` workflows.
 

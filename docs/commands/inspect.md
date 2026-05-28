@@ -6,9 +6,10 @@ tags:
   - cli
   - mmdb
   - mmdb-cli
+  - geoip
 ---
 
-# Inspect Command 🔦
+# Inspect Command
 
 The `inspect` command looks up one or more IP addresses or CIDR prefixes in an MMDB file and prints every matching network and its record.
 

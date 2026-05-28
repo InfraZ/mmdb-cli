@@ -6,13 +6,14 @@ tags:
   - cli
   - mmdb
   - mmdb-cli
+  - geoip
 ---
 
-# Commands 🍭
+# Commands
 
 The MMDB CLI provides several commands to interact with MaxMind DB files. You can use these commands to inspect the contents of an MMDB file, extract metadata, and dump the data in a human-readable format. The following commands are available in MMDB CLI:
 
-We will explore each of these commands in detail in the following sections. Let's get started! 🚀
+We will explore each of these commands in detail in the following sections.
 
 You can use `--help` flag to get more information about available commands at any time:
 

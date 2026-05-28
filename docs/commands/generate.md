@@ -6,9 +6,10 @@ tags:
   - cli
   - mmdb
   - mmdb-cli
+  - geoip
 ---
 
-# Generate Command 🧬
+# Generate Command
 
 The `generate` command is one of amazing features of MMDB CLI that allows you to generate MMDB files from JSON datasets. You can use this command to convert your JSON datasets into MMDB files and create custom databases for your applications. This command is useful for creating custom databases for IP geolocation, ASN lookup, and other use cases.
 

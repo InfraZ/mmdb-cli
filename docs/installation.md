@@ -7,9 +7,10 @@ tags:
   - mmdb
   - mmdb-cli
   - installation
+  - geoip
 ---
 
-# MMDB CLI Installation 🧰
+# MMDB CLI Installation
 
 MMDB CLI ships as a single static binary. You can install it with [Homebrew](#installation-macos-homebrew) on macOS, Linux package managers, pre-built archives from [GitHub Releases](https://github.com/InfraZ/mmdb-cli/releases), or [build from source](./building-from-source).
 

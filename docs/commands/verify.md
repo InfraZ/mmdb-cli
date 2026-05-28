@@ -6,9 +6,10 @@ tags:
   - cli
   - mmdb
   - mmdb-cli
+  - geoip
 ---
 
-# Verify Command 🔍
+# Verify Command
 
 It is essential to verify the integrity of the MMDB file before using it in your applications. The `verify` command helps you to validate the MMDB file and ensure that it is not corrupted.
 
