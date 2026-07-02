@@ -229,8 +229,19 @@ func TestDumpCommandTemplateFormat(t *testing.T) {
 	assert.Contains(t, string(data), "/")
 }
 
+func TestDiffCommandNoDiff(t *testing.T) {
+	output, err := captureAndExecute(t, "diff", "../test/inspect.mmdb", "../test/inspect.mmdb")
+	assert.NoError(t, err)
+	assert.Contains(t, output, "No differences found")
+}
+
+func TestDiffCommandMissingArgs(t *testing.T) {
+	_, err := captureAndExecute(t, "diff", "../test/inspect.mmdb")
+	assert.Error(t, err)
+}
+
 func TestSubcommandRegistration(t *testing.T) {
-	subcommands := []string{"version", "metadata", "inspect", "update", "dump", "generate", "verify"}
+	subcommands := []string{"version", "metadata", "inspect", "update", "dump", "generate", "verify", "diff"}
 	registeredCmds := rootCmd.Commands()
 
 	registeredNames := make(map[string]bool)
