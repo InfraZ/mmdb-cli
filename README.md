@@ -36,6 +36,7 @@ On macOS, you can install MMDB CLI via the [InfraZ Homebrew tap](https://github.
 
 ```bash
 brew tap infraz/tap
+brew trust infraz/tap
 brew install infraz/tap/mmdb-cli
 ```
 
