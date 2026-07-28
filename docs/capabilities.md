@@ -20,6 +20,7 @@ MMDB CLI is a powerful command-line tool offering a wide range of features for w
 - **Modify MMDB**: You can modify existing MMDB files by inserting, updating, or deleting records using the `update` command.
 - **Inspect MMDB**: Look up IPs/CIDRs (YAML, JSON, XML, CSV, or [`jsonpath` output format](./guides/jsonpath)).
 - **Verify MMDB**: Validate database integrity with the `verify` command.
+- **Diff MMDB**: Compare two MMDB files and list added, removed, or modified networks with the `diff` command.
 
 <!---
   completion  Generate the autocompletion script for the specified shell
@@ -55,6 +56,9 @@ mindmap
             updateMMDBMerge(Merge Records)
         verify((Verify))
             verifyMMDB(Verify MMDB File)
+        diff((Diff))
+            diffFull(Full database comparison)
+            diffScoped(Scoped IP/CIDR comparison)
 ```
 
 ## Commands
@@ -78,6 +82,7 @@ Available Commands:
   metadata    Prints metadata of the MMDB file
   update      Update existing MMDB file
   verify      Verify the MMDB file
+  diff        Show differences between two MMDB files
   version     Show version information for mmdb-cli
 
 Flags:
