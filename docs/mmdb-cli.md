@@ -32,6 +32,7 @@ With MMDB CLI, you can:
 - Generate an MMDB file from a JSON dataset
 - Update an existing MMDB file with merge/replace/remove methods
 - Verify database integrity
+- Compare two MMDB files and report added, removed, or modified networks
 
 The CLI binary name used throughout this documentation is `mmdb-cli`.
 
@@ -52,6 +53,7 @@ The CLI binary name used throughout this documentation is `mmdb-cli`.
   - [Generate](./mmdb-cli/commands/generate)
   - [Update](./mmdb-cli/commands/update)
   - [Verify](./mmdb-cli/commands/verify)
+  - [Diff](./mmdb-cli/commands/diff)
 
 ## License
 
