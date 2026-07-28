@@ -26,8 +26,10 @@ import (
 
 const (
 	diffCmdName      = "diff"
-	diffCmdShortDesc = "Show differences between two MMDB files"
-	diffCmdLongDesc  = `Compare two MMDB files and show added, removed, and modified networks.
+	diffCmdShortDesc = "Show differences between two MMDB files (experimental)"
+	diffCmdLongDesc  = `[Experimental] Compare two MMDB files and show added, removed, and modified networks.
+
+This command is experimental: its flags and output format may change in a future release without following semantic versioning.
 
 Exits with code 0 when no differences are found, code 1 when differences exist.
 

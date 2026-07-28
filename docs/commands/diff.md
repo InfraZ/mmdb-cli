@@ -1,15 +1,22 @@
 ---
 sidebar_position: 11
-sidebar_label: Diff
+sidebar_label: Diff (Experimental)
 description: MMDB CLI Diff Command
 tags:
   - cli
   - mmdb
   - mmdb-cli
   - geoip
+  - experimental
 ---
 
-# Diff Command
+# Diff Command (Experimental)
+
+:::caution[Experimental]
+
+The `diff` command is experimental. Its flags and output format may change in a future release without following semantic versioning. Feedback is welcome via [GitHub issues](https://github.com/InfraZ/mmdb-cli/issues).
+
+:::
 
 The `diff` command compares two MMDB files and reports **added**, **removed**, and **modified** networks. It is useful when validating database updates, reviewing changes between builds, or checking that a custom MMDB matches an expected baseline.
 

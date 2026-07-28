@@ -29,7 +29,7 @@ mmdb-cli --help
 - [Generate](./generate): Generate an MMDB file from a JSON dataset.
 - [Update](./update): Update an existing MMDB file with new data.
 - [Verify](./verify): Verify that an MMDB file is valid.
-- [Diff](./diff): Compare two MMDB files and show added, removed, or modified networks.
+- [Diff](./diff) (**Experimental**): Compare two MMDB files and show added, removed, or modified networks.
 
 ## Built-in Utility Commands
 
