@@ -1,0 +1,34 @@
+# Keep the build context to what `go build` actually needs.
+
+# VCS / CI / editor tooling
+.git
+.github
+.claude
+.vscode
+.idea
+.DS_Store
+
+# Docs, examples, fixtures, generated output
+docs
+example
+output
+test
+*.md
+LICENSE
+
+# Test sources (ignored by `go build` anyway)
+**/*_test.go
+
+# Local build artifacts / coverage / databases
+mmdb-cli
+dist
+coverage.out
+*.out
+*.mmdb
+
+# Release tooling config (not used by the Docker build)
+.goreleaser.yml
+
+# The Docker build files themselves
+Dockerfile
+.dockerignore

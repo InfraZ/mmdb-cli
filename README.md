@@ -75,6 +75,41 @@ brew install infraz/tap/mmdb-cli
     mmdb-cli --version
     ```
 
+## Container Image
+
+Pre-built multi-arch images (`linux/amd64`, `linux/arm64`) are published to
+the GitHub Container Registry:
+
+| Reference | Points to |
+| :-- | :-- |
+| `ghcr.io/infraz/mmdb-cli:latest` | Latest commit on `main` |
+| `ghcr.io/infraz/mmdb-cli:1.2.3` (also `:1.2`, `:1`) | Tagged release `v1.2.3` |
+| `ghcr.io/infraz/mmdb-cli:sha-abc1234` | A specific `main` commit |
+
+The image `ENTRYPOINT` is `mmdb-cli` and the working directory is `/data`, so
+mount your files there:
+
+```bash
+# Inspect a database
+docker run --rm -v "$PWD:/data" ghcr.io/infraz/mmdb-cli:latest \
+  metadata -i GeoLite2-City.mmdb
+
+# Generate a database from a JSON dataset (writes back to the host)
+docker run --rm -v "$PWD:/data" --user "$(id -u):$(id -g)" \
+  ghcr.io/infraz/mmdb-cli:latest \
+  generate -i dataset.json -o result.mmdb
+```
+
+The container runs as a non-root user (UID 1000). When writing files to a
+bind mount, add `--user "$(id -u):$(id -g)"` so the output is owned by you.
+
+### Building the image locally
+
+```bash
+docker build -t mmdb-cli --build-arg VERSION=v0.0.0-dev .
+docker run --rm mmdb-cli version
+```
+
 ## Development
 
 To get started, clone the repository and run the following commands to download the dependencies:
