@@ -23,7 +23,7 @@ RUN if [ "${VERSION}" != "v0.0.0" ]; then \
 
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
-    CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
+    CGO_ENABLED=0 GOOS="${TARGETOS}" GOARCH="${TARGETARCH}" \
     go build -trimpath -ldflags="-s -w" -o /out/mmdb-cli .
 
 FROM alpine:3
