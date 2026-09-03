@@ -12,7 +12,7 @@ tags:
 
 # MMDB CLI Installation
 
-MMDB CLI ships as a single static binary. You can install it with [Homebrew](#installation-macos-homebrew) on macOS, Linux package managers, pre-built archives from [GitHub Releases](https://github.com/InfraZ/mmdb-cli/releases), or [build from source](./building-from-source).
+MMDB CLI ships as a single static binary. You can install it with [Homebrew](#installation-macos-homebrew) on macOS, Linux package managers, pre-built archives from [GitHub Releases](https://github.com/InfraZ/mmdb-cli/releases), a [container image](#installation-docker), or [build from source](./building-from-source).
 
 ## Supported Platforms
 
@@ -30,6 +30,8 @@ Pre-built binaries are published for the following OS and architecture combinati
 | Windows  |         arm64         |    ✅     |
 
 **Note:** If your platform is not listed above, you can [build MMDB CLI from source](./building-from-source).
+
+**Note:** A multi-arch container image (`linux/amd64`, `linux/arm64`) is also published to the GitHub Container Registry — see [Installation (Docker)](#installation-docker).
 
 **Note:** We mainly test MMDB CLI on Linux (amd64) and macOS (arm64). If you encounter issues on other platforms, please [open an issue](https://github.com/InfraZ/mmdb-cli/issues).
 
@@ -74,6 +76,86 @@ xattr -dr com.apple.quarantine "$(which mmdb-cli)"
 ```
 
 :::
+
+## Installation (Docker)
+
+Container images are published to the **GitHub Container Registry (GHCR)** for
+`linux/amd64` and `linux/arm64`. No registry login is required to pull public images.
+
+```bash
+docker pull ghcr.io/infraz/mmdb-cli:latest
+```
+
+### Image tags
+
+| Tag | Points to | Mutable? |
+| :-- | :-- | :-: |
+| `latest` | Latest commit on the `main` branch | yes |
+| `X.Y.Z` (e.g. `0.5.0`) | The matching `vX.Y.Z` release | no |
+
+:::tip[Pin a version for reproducible use]
+
+For CI and scripts, pin an immutable `X.Y.Z` release tag (or a digest,
+`ghcr.io/infraz/mmdb-cli@sha256:...`) rather than `latest`.
+
+:::
+
+### Running the image
+
+The image `ENTRYPOINT` is `mmdb-cli` and its working directory is `/data`.
+Mount the directory that holds your MMDB/JSON files at `/data`, then pass the
+subcommand and flags as usual:
+
+```bash
+# Show version (no mount needed)
+docker run --rm ghcr.io/infraz/mmdb-cli:latest version
+
+# Inspect an IP against a local database
+docker run --rm -v "$PWD:/data" ghcr.io/infraz/mmdb-cli:latest \
+  inspect -i GeoLite2-City.mmdb 8.8.8.8
+
+# Print metadata as JSON
+docker run --rm -v "$PWD:/data" ghcr.io/infraz/mmdb-cli:latest \
+  metadata -i GeoLite2-City.mmdb -f json
+```
+
+### Writing files back to the host
+
+The container runs as a non-root user (UID `1000`). When a command writes output
+to the mounted directory, add `--user` so the new files are owned by you:
+
+```bash
+docker run --rm -v "$PWD:/data" --user "$(id -u):$(id -g)" \
+  ghcr.io/infraz/mmdb-cli:latest \
+  generate -i dataset.json -o custom.mmdb
+```
+
+:::caution[SELinux hosts]
+
+On Fedora, RHEL, and derivatives, append `:z` (or `:Z`) to the volume so the
+bind mount is relabelled: `-v "$PWD:/data:z"`.
+
+:::
+
+### Shell alias (optional)
+
+To use the container as if it were a locally installed binary:
+
+```bash
+alias mmdb-cli='docker run --rm -v "$PWD:/data" --user "$(id -u):$(id -g)" ghcr.io/infraz/mmdb-cli:latest'
+
+mmdb-cli version
+mmdb-cli verify -i GeoLite2-City.mmdb
+```
+
+### Supply-chain metadata
+
+Every image is published with SLSA build provenance and an SBOM attestation.
+Inspect them with:
+
+```bash
+docker buildx imagetools inspect ghcr.io/infraz/mmdb-cli:latest
+```
 
 ## Installation Instructions (Linux Package Manager)
 

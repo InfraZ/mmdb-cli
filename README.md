@@ -83,8 +83,7 @@ the GitHub Container Registry:
 | Reference | Points to |
 | :-- | :-- |
 | `ghcr.io/infraz/mmdb-cli:latest` | Latest commit on `main` |
-| `ghcr.io/infraz/mmdb-cli:1.2.3` (also `:1.2`, `:1`) | Tagged release `v1.2.3` |
-| `ghcr.io/infraz/mmdb-cli:sha-abc1234` | A specific `main` commit |
+| `ghcr.io/infraz/mmdb-cli:1.2.3` | Tagged release `v1.2.3` |
 
 The image `ENTRYPOINT` is `mmdb-cli` and the working directory is `/data`, so
 mount your files there:

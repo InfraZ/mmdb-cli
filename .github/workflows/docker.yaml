@@ -53,13 +53,10 @@ jobs:
         with:
           images: ${{ steps.images.outputs.ghcr }}
           # `latest` tracks the main branch
-          # Release tags publish immutable X.Y.Z tags
+          # Release tags publish a single immutable X.Y.Z tag
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
-            type=sha,format=short,enable={{is_default_branch}}
             type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
           flavor: |
             latest=false
           labels: |
